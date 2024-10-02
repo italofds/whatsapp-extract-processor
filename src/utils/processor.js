@@ -26,7 +26,7 @@ export async function fileProcess(htmlString) {
 	const senderDeviceRegex = /SenderDevice(.*?)Type/;
 	const typeRegex = /Type(.*?)MessageStyle/;
 	const msgStyleRegex = /MessageStyle(.*?)MessageSize/;
-	const msgSizeRegex = /MessageSize(.*?)/;
+	const msgSizeRegex = /MessageSize(.*)/;
 
 	let objArray = [];
 	let match;
@@ -89,6 +89,7 @@ export async function fileProcess(htmlString) {
 			obj.msgSize = msgSizeMatch[1];
 		}
 
+		console.log(obj);
 		objArray.push(obj);
 	}
 	

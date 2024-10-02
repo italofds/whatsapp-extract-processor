@@ -70,7 +70,7 @@
 				<form @submit.prevent="handleFormSubmit" class="mt-5">
 					<div class="row">
 						<div class="input-group mb-2">
-							<input v-on:change="previewFile" id="inputFile" name="file" type="file" class="form-control form-control-lg" aria-label="Upload" accept=".html" required="required">
+							<input v-on:change="previewFile" id="inputFile" name="file" type="file" class="form-control form-control-lg" aria-label="Upload" accept=".html" required multiple>
 							<button id="btnSend" class="btn btn-primary btn-lg" type="submit">Processar</button>
 						</div>
 					</div>
@@ -261,7 +261,7 @@ export default {
 				logsByISPChart:undefined,
 			},
 			formData: {
-				selectedFile: '',
+				selectedFiles: null,
 				selectedTimezone: -new Date().getTimezoneOffset()
 			},
 			filterData: {
@@ -510,7 +510,7 @@ export default {
 			}
 		},
 		previewFile(event) {
-			this.formData.selectedFile = event.target.files[0];
+			this.formData.selectedFiles = event.target.files;
 		},
 		handleFormSubmit() {
 			if(this.logsByDateChart) {
@@ -532,7 +532,7 @@ export default {
 			this.resultList = [];
 			this.ispList = [];
 			this.mapMarkers = [];
-			var file = this.formData.selectedFile;
+			var files = this.formData.selectedFiles;
 
 			//Return to list tab
 			const triggerEl = document.querySelector('button[data-bs-target="#list-tab-pane"]')
@@ -542,20 +542,30 @@ export default {
 			const controller = new AbortController();
 			controller.abort();
 
-			if (file) {
-				const reader = new FileReader();
-				reader.onload = (e) => {
-
-					(async () => {
-						this.resultList = await fileProcess(e.target.result);
-						this.ispList = await this.generateIspList();
-
-						window.location.href='#result';
-						this.fetchData();
-					})();
+			if (files && files.length > 0) {
+				(async () => {
+					const processFile = (file) => {
+						return new Promise((resolve, reject) => {
+							const reader = new FileReader();
+							reader.onload = (e) => {
+								fileProcess(e.target.result)
+								.then(result => resolve(result))
+								.catch(error => reject(error));
+							};
+							reader.onerror = (e) => reject(e);
+							reader.readAsText(file);
+						});
+					};
 					
-				}; 
-				reader.readAsText(file);
+					for(const file of files) {
+						const fileResult = await processFile(file);
+						this.resultList = this.resultList.concat(...fileResult);
+					}					
+					
+					this.ispList = await this.generateIspList();
+					window.location.href = '#result';
+					this.fetchData();					
+				})();
 			}
 		},
 		async generateIspList() {

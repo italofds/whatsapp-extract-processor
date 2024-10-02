@@ -152,7 +152,7 @@ export default {
 			this.currentPage = 1;
 		},
 		printValue: function (value) {
-			return value ? value : "-";
+			return value ? value.substring(0, 32767) : "-";
 		},
 		convertDatetimeFormat: function (dateValue, format) {
 			if (dateValue) {
@@ -169,21 +169,30 @@ export default {
 
 			for(let resultItem of this.ipData) {
 				var exportData = {
-					"Endereço IP" : this.printValue(resultItem.ip),
 					"Data" : this.convertDatetimeFormat(resultItem.timestamp, "DD/MM/YYYY"),
 					"Hora" : this.convertDatetimeFormat(resultItem.timestamp, "HH:mm:ss"),
+					"ID da Mensagem" : this.printValue(resultItem.msgId),
+					"Remetente" : this.printValue(resultItem.sender),
+					"Destinatário" : this.printValue(resultItem.recipients),
+					"ID do Grupo" : this.printValue(resultItem.groupId),
+					"Endereço IP (Remetente)" : this.printValue(resultItem.ip),
+					"Porta Lógica (Remetente)" : this.printValue(resultItem.port),					
 					"País" : this.printValue(this.ispData[resultItem.ispIndex].country), 
 					"UF" : this.printValue(this.ispData[resultItem.ispIndex].region), 
 					"Cidade" : this.printValue(this.ispData[resultItem.ispIndex].city), 
-					"ISP" : this.printValue(this.ispData[resultItem.ispIndex].isp)
+					"ISP" : this.printValue(this.ispData[resultItem.ispIndex].isp),
+					"Dispositivo" : this.printValue(resultItem.senderDevice),
+					"Tipo" : this.printValue(resultItem.type),
+					"Estilo Mensagem" : this.printValue(resultItem.msgStyle),
+					"Tamanho Mensagem" : this.printValue(resultItem.msgSize)
 				};
 				exportDataList.push(exportData);
 			}			
 
 			var worksheet = XLSX.utils.json_to_sheet(exportDataList);					
 			var workbook = XLSX.utils.book_new();
-			XLSX.utils.book_append_sheet(workbook, worksheet, "Dados IP");
-			XLSX.writeFile(workbook, "meta-ip-result.xlsx");
+			XLSX.utils.book_append_sheet(workbook, worksheet, "Mensagens");
+			XLSX.writeFile(workbook, "whatsapp-extract-result.xlsx");
 		},
 		previewsPage() {
 			if(this.currentPage > 1) {
