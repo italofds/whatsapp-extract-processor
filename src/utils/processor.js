@@ -15,7 +15,7 @@ export async function fileProcess(htmlString) {
 	//Get only text from html and replace all white spaces and line breaks
 	const $htmlText = $html.text().replace(/\s+/g, '');
 
-	const msgBlockRegex = /MessageTimestamp[\s\S]*?(?=MessageTimestamp|$)/g;
+	const msgBlockRegex = /MessageTimestamp[\s\S]*?(?=MessageTimestamp|CallLog)/g;
 	const timestampRegex = /Timestamp(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})UTCMessageId/;
 	const msgIdRegex = /MessageId(.*?)Sender/;
 	const senderRegex = /Sender(.*?)Recipients/;
