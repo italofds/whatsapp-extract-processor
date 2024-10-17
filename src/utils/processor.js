@@ -1,20 +1,94 @@
-import $ from 'jquery';
+import { parse } from 'node-html-parser';
 
-// It works for both versions of Meta company's responses, before and after 2024. 
-// To achieve this, the code searches for elements in tables (old format) or in divs (new format).
+onmessage = function(e) {
+    const files = e.data.files;
+	let requestParams = {};
+	let msgs = [];
+	let calls = [];
 
-export async function fileProcess(htmlString) {
+	(async () => {
+		const processFile = (file) => {
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onload = (e) => {
+					startProcess(e.target.result)
+					.then(result => resolve(result))
+					.catch(error => reject(error));
+				};
+				reader.onerror = (e) => reject(e);
+				reader.readAsText(file);
+			});
+		};
 		
-	//Disable source loading from 'src' and 'href' attributes
-	htmlString = htmlString.replace(/src=/gi, 'data-src=').replace(/href=/gi, 'data-href=');
-	const $html = $(htmlString);
-	
-	//Remove all page breaks
-	$html.find('.pageBreak').remove();
-	
-	//Get only text from html and replace all white spaces and line breaks
-	const $htmlText = $html.text().replace(/\s+/g, '');
+		for(let i = 0; i < files.length; i++) {
+			postMessage({
+				progress: Math.floor(i / files.length * 100)
+			});
 
+			let file = files[i];
+			const fileResult = await processFile(file);
+
+			if(fileResult && fileResult.requestParams) {
+				requestParams = fileResult.requestParams;
+			}
+
+			if(fileResult && fileResult.messageLogs) {
+				msgs = msgs.concat(...fileResult.messageLogs);
+			}
+
+			if(fileResult && fileResult.callLogs) {
+				calls = calls.concat(...fileResult.callLogs);
+			}			
+		}
+
+		console.log(calls);
+
+		postMessage({
+			result: {
+				requestParams: requestParams,
+				messageLogs: msgs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)),
+				callLogs: calls.sort((a, b) => new Date(a.events[0].timestamp) - new Date(b.events[0].timestamp))
+			}
+		});
+	})();
+};
+
+async function startProcess(htmlString) {
+	//Disable source loading from 'src' and 'href' attributes
+    htmlString = htmlString.replace(/src=/gi, 'data-src=').replace(/href=/gi, 'data-href=');
+
+    // Parse HTML to a DOM object
+    const root = parse(htmlString);
+
+    //Remove all page breaks
+    root.querySelectorAll('.pageBreak, script, style, noscript').forEach(element => element.remove());
+
+    //Get only text from html and replace all white spaces and line breaks
+    const text = root.innerText.replace(/\s+/g, '');
+	
+	const resultObj = {
+		requestParams: getRequestParams(text),
+		messageLogs: getMessageLogs(text),
+		callLogs: getCallLogs(text),
+	}
+
+	return resultObj;    
+}
+
+function getRequestParams(text) {
+	const accountIdRegex = /AccountIdentifier\+(.*?)AccountType/;
+
+	const obj = {};
+
+	const accountIdMatch = accountIdRegex.exec(text);		
+	if (accountIdMatch) {
+		obj.accountId = `${accountIdMatch[1]}`;
+	}
+
+	return obj;
+}
+
+function getMessageLogs(text) {
 	const msgBlockRegex = /MessageTimestamp[\s\S]*?(?=MessageTimestamp|CallLog)/g;
 	const timestampRegex = /Timestamp(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})UTCMessageId/;
 	const msgIdRegex = /MessageId(.*?)Sender/;
@@ -30,9 +104,9 @@ export async function fileProcess(htmlString) {
 
 	let objArray = [];
 	let match;
-	while ((match = msgBlockRegex.exec($htmlText)) !== null) {
-		var block = match[0];
-		var obj = {};
+	while ((match = msgBlockRegex.exec(text)) !== null) {
+		const block = match[0];
+		const obj = {};
 
 		const timestampMatch = timestampRegex.exec(block);		
 		if (timestampMatch) {
@@ -89,45 +163,97 @@ export async function fileProcess(htmlString) {
 			obj.msgSize = msgSizeMatch[1];
 		}
 
-		console.log(obj);
 		objArray.push(obj);
 	}
-	
-	//Find right format: IP Address First then Time or Time First then IP Adress
-	/* const format1Regex = /IpAddressesIpAddress((?:\d{1,3}\.){3}\d{1,3}|(?:[0-9a-f]{1,4}:){7}[0-9a-f]{1,4})Time(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})Utc/i;
-	const format2Regex = /IpAddressesTime(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})UtcIpAddress((?:\d{1,3}\.){3}\d{1,3}|(?:[0-9a-f]{1,4}:){7}[0-9a-f]{1,4})/i;
-	
-	const ipTimeArray = [];
-	const ipTimeBlockRegex = /IpAddress((?:\d{1,3}\.){3}\d{1,3}|(?:[0-9a-f]{1,4}:){7}[0-9a-f]{1,4})Time(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})Utc/ig;
-	const timeIpBlockRegex = /Time(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})UtcIpAddress((?:\d{1,3}\.){3}\d{1,3}|(?:[0-9a-f]{1,4}:){7}[0-9a-f]{1,4})/ig;
+
+	return objArray;
+}
+
+function getCallLogs(text) {
+	const callBlockRegex = /CallCallId[\s\S]*?(?=CallCallId|$)/g;
+	const callIdRegex = /CallId(.*?)CallCreator/;
+	const callCreatorRegex = /CallCreator(.*?)Events/;
+	const eventsRegex = /Events(.*)/;
+	const eventBlockRegex = /Type[\s\S]*?(?=Type|$)/g
+	const eventTypeRegex = /Type(.*?)Timestamp/;
+	const eventTimestampRegex = /Timestamp(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})UTCFrom/;
+	const eventFromRegex = /From(.*?)To/;
+	const eventToRegex = /To(.*?)FromIp/;
+	const eventFromIpRegex = /FromIp(.*?)FromPort/;
+	const eventFromPortRegex = /FromPort(.*?)(?=Media|$)/;
+	const eventMediaTypeRegex = /Media(.*)/;
+
+	let objArray = [];
 	let match;
+	while ((match = callBlockRegex.exec(text)) !== null) {
+		const block = match[0];
+		const obj = {};
 
-	//If the file corresponds to format1, process first IP then Time as default format
-	if(format1Regex.test($htmlText)) {
-		while ((match = ipTimeBlockRegex.exec($htmlText)) !== null) {
-			const ip = formatIP(match[1]);
-			const date = `${match[2]} ${match[3]} UTC`;
-			const ipTimeObj = {"ip" : ip, "timestamp" : date};
-
-			ipTimeArray.push(ipTimeObj);
-		}
-		
-	//If the file corresponds to format1, process first Time then IP as default format
-	} else if(format2Regex.test($htmlText)) {		
-		while ((match = timeIpBlockRegex.exec($htmlText)) !== null) {
-			const ip = formatIP(match[3]);
-			const date = `${match[1]} ${match[2]} UTC`;
-			const ipTimeObj = {"ip" : ip, "timestamp" : date};
-
-			ipTimeArray.push(ipTimeObj);
+		const callIdMatch = callIdRegex.exec(block);		
+		if (callIdMatch) {
+			obj.callId = callIdMatch[1];
 		}
 
-	// If none of the formats are found, an error message will appear.
-	} else {
-		alert("Não foi possível processar o arquivo: não foram encontrados registros de IP e Data no formato esperado.");
+		const callCreatorMatch = callCreatorRegex.exec(block);
+		if (callCreatorMatch) {
+			obj.callCreator = callCreatorMatch[1];
+		}
+
+		const eventsMatch = eventsRegex.exec(block);
+		if (eventsMatch) {
+			let eventsText = eventsMatch[1];
+			eventsText = eventsText.replace(/MediaType/g, 'Media');
+
+			let eventBlockMatch;			
+			while ((eventBlockMatch = eventBlockRegex.exec(eventsText)) !== null) {
+				const eventBlock = eventBlockMatch[0];
+				const eventObj = {};
+
+				const eventTypeMatch = eventTypeRegex.exec(eventBlock);		
+				if (eventTypeMatch) {
+					eventObj.type = eventTypeMatch[1];
+				}
+
+				const eventTimestampMatch = eventTimestampRegex.exec(eventBlock);		
+				if (eventTimestampMatch) {
+					eventObj.timestamp = `${eventTimestampMatch[1]} ${eventTimestampMatch[2]} UTC`;
+				}
+
+				const eventFromMatch = eventFromRegex.exec(eventBlock);		
+				if (eventFromMatch) {
+					eventObj.from = eventFromMatch[1];
+				}
+
+				const eventToMatch = eventToRegex.exec(eventBlock);		
+				if (eventToMatch) {
+					eventObj.to = eventToMatch[1];
+				}
+
+				const eventFromIpMatch = eventFromIpRegex.exec(eventBlock);		
+				if (eventFromIpMatch) {
+					eventObj.ip = formatIP(eventFromIpMatch[1]);
+				}
+
+				const eventFromPortMatch = eventFromPortRegex.exec(eventBlock);		
+				if (eventFromPortMatch) {
+					eventObj.port = eventFromPortMatch[1];
+				}
+
+				const eventMediaTypeMatch = eventMediaTypeRegex.exec(eventBlock);		
+				if (eventMediaTypeMatch) {
+					eventObj.mediaType = eventMediaTypeMatch[1];
+				}
+
+				if(!obj.events) {
+					obj.events = [];	
+				}
+				obj.events.push(eventObj); 
+			}
+		}		
+
+		objArray.push(obj);
 	}
 
-	return ipTimeArray; */
 	return objArray;
 }
 

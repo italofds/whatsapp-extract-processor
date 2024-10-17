@@ -14,7 +14,7 @@ export function formatPhoneNumber(phoneNumber) {
         } else if (cleaned.length === 12) {
             match = cleaned.match(/55(\d{2})(\d{4})(\d{4})$/);
             if (match) {
-                return `+55 (${match[1]}) 9${match[2]}-${match[3]}`;
+                return `+55 (${match[1]}) ${match[2]}-${match[3]}`;
             }
         }
     }
@@ -23,6 +23,6 @@ export function formatPhoneNumber(phoneNumber) {
     return `+${phoneNumber}`;
 }
 
-export function formatDate(dateValue, format) {
-    return moment.utc(dateValue).locale('pt-br').format(format);
+export function formatDate(dateValue, format, timezone = "0") {
+    return moment.utc(dateValue).utcOffset(timezone).locale('pt-br').format(format);
 }
