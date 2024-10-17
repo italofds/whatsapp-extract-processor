@@ -1,6 +1,6 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
-  publicPath: process.env.NODE_ENV === "production" ? "/meta-ip-processor/" : "/",
+  publicPath: process.env.NODE_ENV === "production" ? "/whatsapp-extract-processor/" : "/",
   transpileDependencies: true,
   chainWebpack: (config) => {
     config.plugin('define').tap((definitions) => {
