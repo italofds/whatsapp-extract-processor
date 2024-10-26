@@ -79,7 +79,7 @@ export default {
                 ...(this.notTargetMarkers ?? [])
             ];
             
-            if(window.google) {
+            if(window.google && mergedMarkers && mergedMarkers.length > 0) {
                 const bounds = new window.google.maps.LatLngBounds();
                 mergedMarkers.map(marker => {
                     bounds.extend({

@@ -23,7 +23,7 @@
 			<tbody>
 				<tr v-for="(resultObj, index) in visibleList" :key="index" :class="ispList?.[resultObj.ispIndex].status">
 					<td>
-						<div v-if="ispList[resultObj.ispIndex].status == 'loading'" class="spinner-border spinner-border-sm text-primary" role="status">
+						<div v-if="ispList?.[resultObj.ispIndex].status == 'loading'" class="spinner-border spinner-border-sm text-primary" role="status">
 							<span class="visually-hidden">Loading...</span>
 						</div>
 						<i v-if="ispList?.[resultObj.ispIndex].status == 'error'" class="text-danger bi bi-x-circle-fill"></i>
