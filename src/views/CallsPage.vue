@@ -5,9 +5,7 @@
         <div class="card mb-4 rounded-3 shadow-sm">
             <h4 class="card-header py-3">Localização Aproximada dos Provedores</h4>
             <div class="card-body">
-                <GMapMap ref="myMapRef" :center="mapCenter" :zoom="mapZoom" map-type-id="terrain" style="width: 100%; height: 400px" :options="mapOptions">
-                    <GMapMarker :key="marker" v-for="marker in mapMarkers" :position="marker.position"/>	
-                </GMapMap>
+                <map-component ref="mapComponent" :targetMarkers="targetMarkers" :notTargetMarkers="notTargetMarkers"></map-component>
             </div>
         </div>
 
@@ -17,7 +15,7 @@
                 <button class="btn btn-outline-secondary ms-3" @click="$refs.listComponent.exportExcel()">Exportar Excel</button>
             </h4>
             <div class="card-body">
-                <list-component ref="listComponent" :ipData="callLogs" :ispData="ispList" :timezoneData="selectedTimezone" :contactData="processedData?.contactList"></list-component>
+                <list-component ref="listComponent" :processedData="processedData" :timezoneData="selectedTimezone"></list-component>
             </div>
         </div>        
     </div>
@@ -25,12 +23,13 @@
 
 <script>
 
+import MapComponent from '@/components/MapComponent.vue';
 import ListComponent from '@/components/CallListComponent.vue';
-import darkMapStyleJSON from '../../assets/dark-map-style.json'
 
 export default {    
     name: 'CallsPage',
     components: {
+        MapComponent,
 		ListComponent
 	},
     props: {
@@ -41,121 +40,64 @@ export default {
         selectedTimezone: {
             type: Number,
             required: true
-        },
+        }
+    },
+    data() {
+        return {
+            targetMarkers: null,
+            notTargetMarkers: null
+        }
     },
     mounted() {
         if(!this.processedData) {
             this.$router.push('/');
         }
 
-        if(document.documentElement.getAttribute("data-bs-theme") === "dark"){
-			this.mapOptions.styles = darkMapStyleJSON;
-		}
-
-		const mutationCallback = (mutationsList) => {
-			for (const mutation of mutationsList) {
-				if (
-				mutation.type !== "attributes" ||
-				mutation.attributeName !== "data-bs-theme"
-				) {
-				return
-				}
-
-				if(mutation.target.getAttribute("data-bs-theme") === "dark") {
-					this.mapOptions.styles = darkMapStyleJSON;
-				} else {
-					this.mapOptions.styles = [];
-				}
-			}
-		}
-		const observer = new MutationObserver(mutationCallback);
-		observer.observe(document.documentElement, { attributes: true });
-
-        this.refreshMarkers();
-    },
-    data() {
-        return {
-            mapMarkers: [],
-			mapCenter: { lat: 0, lng: 0 },
-			mapZoom: 2,
-			mapOptions: {
-				zoomControl: true,
-				mapTypeControl: false,
-				scaleControl: false,
-				streetViewControl: false,
-				rotateControl: false,
-				fullscreenControl: false,
-				scrollwheel: false,
-				minZoom: 2
-			},
-            filterData: {
-				initialDate: '',
-				finalDate: '',
-				initialTime: '',
-				finalTime: '',
-				country: '',
-				region: '',
-				city: '',
-				isp: ''
-			},
-        }
+        this.notTargetMarkers = this.notTargetMarkersPositions;
+        this.targetMarkers = this.targetMarkersPositions;
     },
     computed: {
-        messageLogs: function() {
-            if(this.processedData) {
-                return this.processedData.messageLogs;
-            }
-            return null;
+        targetMarkersPositions: function() {
+            return this.getCallPositions(true);
         },
-        callLogs: function() {
-            if(this.processedData) {
-                return this.processedData.callLogs.flatMap(call => 
-                    call.events.map(event => ({ ...event, callId: call.callId, callCreator: call.callCreator }))
-                );
-            }
-            return null;            
-        },
-        ispList: function() {
-            if(this.processedData) {
-                return this.processedData.ispList;
-            }
-            return null;
-        },
-        markersPositions: function() {
-            if(this.processedData && this.processedData.ispList) {
-                const arrayLatLng = this.processedData.ispList
-                    .map(obj => ({position: { lat: obj.lat, lng: obj.lng }}))
-                    .filter(obj => obj.position.lat !== null && obj.position.lng !== null);
-                const arrayUniqueLatLng = arrayLatLng.filter((obj, index, self) =>
-                    index === self.findIndex((t) => (
-                        t.position.lat === obj.position.lat && t.position.lng === obj.position.lng
-                    ))
-                );
-                return arrayUniqueLatLng;
-            }
-            return null;
+        notTargetMarkersPositions: function() {
+            return this.getCallPositions(false);
         }
     },
     methods: {
-        refreshMarkers() {
-            this.mapMarkers = this.markersPositions;
+        getCallPositions(isTarget) {
+            if(this.processedData && this.processedData.callLogs && this.processedData.requestParams && this.processedData.ispList) {
+                const targetPositions = this.processedData.callLogs.flatMap(call => call.events
+                    .filter(event => 
+                        ((isTarget && event.from === this.processedData.requestParams.accountId)
+                        || (!isTarget && event.from !== this.processedData.requestParams.accountId))
+                        && this.processedData.ispList[event.ispIndex].lat 
+                        && this.processedData.ispList[event.ispIndex].lng)    
+                    .map(event => ({ 
+                        position: { 
+                            lat: this.processedData.ispList[event.ispIndex].lat, 
+                            lng: this.processedData.ispList[event.ispIndex].lng 
+                        }
+                    })));
 
-            if(window.google) {
-                const bounds = new window.google.maps.LatLngBounds();
-                this.mapMarkers.map(marker => {
-                    bounds.extend({
-                        lat: marker.position.lat,
-                        lng: marker.position.lng,
-                    });
-                });
-                this.$refs.myMapRef.fitBounds(bounds);
+                const uniqueTargetPositions = Array.from(
+                    new Map(targetPositions.map(item => [`${item.position.lat},${item.position.lng}`, item])).values()
+                );
+
+                return uniqueTargetPositions;                
             }
+            return null;
         }
     },
     watch: {
-        markersPositions(newValue, oldValue) {
+        targetMarkersPositions(newValue, oldValue) {
             if(newValue?.length != oldValue?.length) {
-                this.refreshMarkers();
+                this.targetMarkers = newValue;
+            }
+        },
+        notTargetMarkersPositions(newValue, oldValue) {
+            if(newValue?.length != oldValue?.length) {                
+                this.notTargetMarkers = newValue;
             }
         }
     }

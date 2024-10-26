@@ -110,12 +110,12 @@
 								</div>
 							</div>
 
-							<div v-if="processedIspCount != processedData.ispList.length" class="alert mb-4 alert-warning" role="alert">
+							<div v-if="processedIspCount != processedData.ispList?.length" class="alert mb-4 alert-warning" role="alert">
 								<div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">Loading...</span></div>
-								<span>Consultando IP's: <strong>{{ processedIspCount }}</strong> de <strong>{{ processedData.ispList.length }}</strong> </span>
+								<span>Consultando IP's: <strong>{{ processedIspCount }}</strong> de <strong>{{ processedData.ispList?.length }}</strong> </span>
 							</div>
 
-							<div v-if="errorIspCount && processedIspCount == processedData.ispList.length" class="alert mb-4 alert-danger alert-dismissible fade show" role="alert">
+							<div v-if="errorIspCount && processedIspCount == processedData.ispList?.length" class="alert mb-4 alert-danger alert-dismissible fade show" role="alert">
 								<i class="text-danger bi bi-x-circle-fill me-3"></i>
 								<span>Não foi possível consultar <strong>{{ errorIspCount }}</strong> IP(s).</span>
 								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -152,12 +152,12 @@
 										Registros de Chamadas
 									</router-link>
 								</li>
-								<li class="nav-item">
+								<!-- <li class="nav-item">
 									<a href="#" class="nav-link link-body-emphasis disabled opacity-25">
 										<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#chart"></use></svg>
 										Gráficos (Em breve)
 									</a>
-								</li>
+								</li> -->
 								<li class="nav-item">
 									<router-link to="/view" :class="[$route.name === 'ViewPage' ? 'nav-link active' : 'nav-link link-body-emphasis']" aria-current="page">
 										<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#view"></use></svg>
@@ -190,9 +190,9 @@
 				<div class="bg-body-tertiary w-100 overflow-auto">
 					<div class="d-flex flex-column h-100">
 						<router-view 
-						:processedData="processedData" 
-						:selectedTimezone="selectedTimezone"
-						@updateProcessedData="updateProcessedData" />
+							:processedData="processedData" 
+							:selectedTimezone="selectedTimezone"
+							@updateProcessedData="updateProcessedData" />
 
 						<p class="text-muted small text-center py-3 mb-0">Desenvolvido por <a target="_blank" href="https://github.com/italofds">Ítalo Santos</a> | © 2024 | Licença GPL-3.0 | Hospedado pelo GitHub Pages | Contribua: <a target="_blank" href="https://github.com/italofds/whatsapp-extract-processor">github.com/italofds/whatsapp-extract-processor</a></p>	
 					</div>
@@ -225,7 +225,7 @@
 import axios from 'axios';
 import moment from 'moment';
 import momentTZ from 'moment-timezone';
-import '../assets/js/color-modes.js'
+import '@/assets/js/color-modes.js'
 import {formatPhoneNumber, formatDate} from '@/utils/utils'
 
 const MAX_DAYS_DIFF = 10;

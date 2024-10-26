@@ -21,13 +21,13 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="(resultObj, index) in finalList" :key="index" :class="ispData[resultObj.ispIndex].status">
+				<tr v-for="(resultObj, index) in visibleList" :key="index" :class="ispList?.[resultObj.ispIndex].status">
 					<td>
-						<div v-if="ispData[resultObj.ispIndex].status == 'loading'" class="spinner-border spinner-border-sm" role="status">
+						<div v-if="ispList[resultObj.ispIndex].status == 'loading'" class="spinner-border spinner-border-sm text-primary" role="status">
 							<span class="visually-hidden">Loading...</span>
 						</div>
-						<i v-if="ispData[resultObj.ispIndex].status == 'error'" class="text-danger bi bi-x-circle-fill"></i>
-						<i v-if="ispData[resultObj.ispIndex].status == 'success'" class="text-success bi bi-check-circle-fill"></i>
+						<i v-if="ispList?.[resultObj.ispIndex].status == 'error'" class="text-danger bi bi-x-circle-fill"></i>
+						<i v-if="ispList?.[resultObj.ispIndex].status == 'success'" class="text-success bi bi-check-circle-fill"></i>
 					</td>
 
 					<td class="text-nowrap">{{ printValue(resultObj.callId) }}</td>
@@ -39,10 +39,10 @@
 					<td class="text-nowrap">{{ printId(resultObj.to) }}</td>
 					<td class="text-nowrap">{{ printValue(resultObj.ip) }}</td>
 					<td class="text-nowrap">{{ printValue(resultObj.port) }}</td>
-					<td class="text-nowrap">{{ printValue(ispData[resultObj.ispIndex].country) }}</td>
-					<td class="text-nowrap">{{ printValue(ispData[resultObj.ispIndex].region) }}</td>
-					<td class="text-nowrap">{{ printValue(ispData[resultObj.ispIndex].city) }}</td>
-					<td class="text-nowrap">{{ printValue(ispData[resultObj.ispIndex].isp) }}</td>
+					<td class="text-nowrap">{{ printValue(ispList?.[resultObj.ispIndex].country) }}</td>
+					<td class="text-nowrap">{{ printValue(ispList?.[resultObj.ispIndex].region) }}</td>
+					<td class="text-nowrap">{{ printValue(ispList?.[resultObj.ispIndex].city) }}</td>
+					<td class="text-nowrap">{{ printValue(ispList?.[resultObj.ispIndex].isp) }}</td>
 					<td class="text-nowrap">{{ printValue(resultObj.mediaType) }}</td>
 				</tr>
 			</tbody>
@@ -93,9 +93,7 @@ import { formatDate, formatPhoneNumber } from '@/utils/utils.js';
 export default {
 	name: 'CallListComponent',
 	props: {
-		ipData: null,
-		ispData: null,
-		contactData: null,
+		processedData: null,
 		timezoneData: null
 	},
 	data() {
@@ -105,7 +103,7 @@ export default {
 		};
 	},
     watch: {
-        ipData: {
+        callLogs: {
             deep: true,
             handler() {
                 this.restartList();
@@ -113,9 +111,23 @@ export default {
         }
     },
 	computed: {
+		callLogs: function() {
+            if(this.processedData && this.processedData.callLogs) {
+                return this.processedData.callLogs.flatMap(call => 
+                    call.events.map(event => ({ ...event, callId: call.callId, callCreator: call.callCreator }))
+                );
+            }
+            return null;            
+        },
+		ispList: function() {
+            if(this.processedData) {
+                return this.processedData.ispList;
+            }
+            return null;
+        },
 		maxPages: function () {
-			if(this.ipData) {
-				return Math.ceil(this.ipData.length / this.MAX_ITENS_PER_PAGE);
+			if(this.callLogs) {
+				return Math.ceil(this.callLogs.length / this.MAX_ITENS_PER_PAGE);
 			}
 			return null;
 		},
@@ -125,14 +137,14 @@ export default {
 		lastVisibleItem: function() {
 			var itemIndex = ((this.currentPage-1) * this.MAX_ITENS_PER_PAGE) + this.MAX_ITENS_PER_PAGE;
 
-			if(this.ipData && itemIndex > this.ipData.length) {
-				itemIndex = this.ipData.length;
+			if(this.callLogs && itemIndex > this.callLogs.length) {
+				itemIndex = this.callLogs.length;
 			}
 			return itemIndex;
 		},
-		finalList: function() {
-			if(this.ipData && this.ipData.length > 0) {
-				return this.ipData.slice(this.firstVisibleItem, this.lastVisibleItem);
+		visibleList: function() {
+			if(this.callLogs && this.callLogs.length > 0) {
+				return this.callLogs.slice(this.firstVisibleItem, this.lastVisibleItem);
 			} 
 			return null;
 		}
@@ -168,8 +180,8 @@ export default {
             }
 		},
 		getContact(id) {
-            if(this.contactData) {
-                for(let contact of this.contactData) {
+            if(this.processedData && this.processedData.contactList) {
+                for(let contact of this.processedData.contactList) {
                     if(contact.accountId == id) {
                         return contact;
                     }
@@ -181,7 +193,7 @@ export default {
 		exportExcel() {
 			var exportDataList = [];
 
-			for(let resultItem of this.ipData) {
+			for(let resultItem of this.callLogs) {
 				var exportData = {
 					"ID da Chamada" : this.printValue(resultItem.callId),
 					"Criador da Chamada" : this.printId(resultItem.callCreator),
@@ -192,10 +204,10 @@ export default {
 					"Destino" : this.printId(resultItem.to),
 					"Endereço IP (Remetente)" : this.printValue(resultItem.ip),
 					"Porta Lógica (Remetente)" : this.printValue(resultItem.port),					
-					"País" : this.printValue(this.ispData[resultItem.ispIndex].country), 
-					"UF" : this.printValue(this.ispData[resultItem.ispIndex].region), 
-					"Cidade" : this.printValue(this.ispData[resultItem.ispIndex].city), 
-					"ISP" : this.printValue(this.ispData[resultItem.ispIndex].isp),
+					"País" : this.printValue(this.ispList?.[resultItem.ispIndex].country), 
+					"UF" : this.printValue(this.ispList?.[resultItem.ispIndex].region), 
+					"Cidade" : this.printValue(this.ispList?.[resultItem.ispIndex].city), 
+					"ISP" : this.printValue(this.ispList?.[resultItem.ispIndex].isp),
 					"Tipo de Mídia" : this.printValue(resultItem.mediaType)
 				};
 				exportDataList.push(exportData);

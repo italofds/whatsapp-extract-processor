@@ -41,8 +41,6 @@ onmessage = function(e) {
 			}			
 		}
 
-		console.log(calls);
-
 		postMessage({
 			result: {
 				requestParams: requestParams,

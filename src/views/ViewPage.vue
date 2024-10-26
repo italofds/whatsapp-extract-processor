@@ -123,7 +123,7 @@
                                     <small class="text-muted" style="font-size: 75%;">{{ message.ip + "/" + message.port }}</small>
                                 </div>
                                 <div v-if="ispList" class="text-end w-100">
-                                    <small class="text-muted" style="font-size: 75%;">{{ ispList[message.ispIndex].isp }}</small>
+                                    <small class="text-muted" style="font-size: 75%;">{{ ispList?.[message.ispIndex].isp }}</small>
                                 </div>                            
                                 <div class="text-end w-100">
                                     <small class="text-muted fw-bold" style="font-size: 75%;">{{ formatDate(message.timestamp, "HH:mm:ss", selectedTimezone) }}</small>
@@ -190,7 +190,7 @@
                                                 <small class="mb-3 text-muted">
                                                     <div title="Origem">{{ formatPhoneNumber(event.from) }}</div>
                                                     <div title="Endereço IP e Porta Lógica">{{ event.ip + "/" + event.port  }}</div>
-                                                    <div title="Provedor">{{ printValue(ispList[event.ispIndex].isp)  }}</div>
+                                                    <div title="Provedor">{{ printValue(ispList?.[event.ispIndex].isp)  }}</div>
                                                 </small>                                                
                                             </li>
                                         </ul>
@@ -242,7 +242,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Perfil <span v-if="getContact(aactiveContact)?.isBusiness">Comercial</span></h1>
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Perfil <span v-if="getContact(activeContact)?.isBusiness">Comercial</span></h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body bg-body-tertiary">
