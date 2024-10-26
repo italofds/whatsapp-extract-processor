@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container p-4 pb-0">
         <div class="card shadow-sm">
             <div class="card-body mb-3 p-3 p-lg-5">
                 <h1 class="mb-3">Processador de Interceptação do WhatsApp</h1>

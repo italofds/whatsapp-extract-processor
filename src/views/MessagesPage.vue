@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="p-4 pb-0">
         <h1 class="mb-4">Registros de Mensagens</h1>
 
         <!-- <div class="card mb-4 rounded-3 shadow-sm">

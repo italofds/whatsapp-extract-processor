@@ -31,12 +31,12 @@
 					</td>
 
 					<td class="text-nowrap">{{ printValue(resultObj.callId) }}</td>
-					<td class="text-nowrap">{{ printValue(formatPhoneNumber(resultObj.callCreator)) }}</td>
+					<td class="text-nowrap">{{ printId(resultObj.callCreator) }}</td>
 					<td class="text-nowrap">{{ printValue(resultObj.type) }}</td>					
 					<td class="text-nowrap text-center">{{ formatDate(resultObj.timestamp, "DD/MM/YYYY", timezoneData) }}</td>
 					<td class="text-nowrap text-center">{{ formatDate(resultObj.timestamp, "HH:mm:ss", timezoneData) }}</td>					
-					<td class="text-nowrap">{{ printValue(formatPhoneNumber(resultObj.from)) }}</td>
-					<td class="text-nowrap">{{ printValue(formatPhoneNumber(resultObj.to)) }}</td>
+					<td class="text-nowrap">{{ printId(resultObj.from) }}</td>
+					<td class="text-nowrap">{{ printId(resultObj.to) }}</td>
 					<td class="text-nowrap">{{ printValue(resultObj.ip) }}</td>
 					<td class="text-nowrap">{{ printValue(resultObj.port) }}</td>
 					<td class="text-nowrap">{{ printValue(ispData[resultObj.ispIndex].country) }}</td>
@@ -95,6 +95,7 @@ export default {
 	props: {
 		ipData: null,
 		ispData: null,
+		contactData: null,
 		timezoneData: null
 	},
 	data() {
@@ -152,18 +153,43 @@ export default {
 		printValue: function (value) {
 			return value ? value.substring(0, 32767) : "-";
 		},
+		printId: function (value) {
+			if(value) {
+				var contactNum = this.formatPhoneNumber(value);
+				var contactName = this.getContact(value)?.name;				
+
+				if(contactName) {
+					return `${contactNum} (${contactName})`;
+				} else {
+					return contactNum;
+				}   
+            } else {
+                return "-";
+            }
+		},
+		getContact(id) {
+            if(this.contactData) {
+                for(let contact of this.contactData) {
+                    if(contact.accountId == id) {
+                        return contact;
+                    }
+                }
+            }
+
+            return null;
+        },
 		exportExcel() {
 			var exportDataList = [];
 
 			for(let resultItem of this.ipData) {
 				var exportData = {
 					"ID da Chamada" : this.printValue(resultItem.callId),
-					"Criador da Chamada" : this.printValue(resultItem.callCreator),
+					"Criador da Chamada" : this.printId(resultItem.callCreator),
 					"Tipo" : this.printValue(resultItem.type),
 					"Data" : this.formatDate(resultItem.timestamp, "DD/MM/YYYY", this.timezoneData),
 					"Hora" : this.formatDate(resultItem.timestamp, "HH:mm:ss", this.timezoneData),					
-					"Origem" : this.printValue(resultItem.from),
-					"Destino" : this.printValue(resultItem.to),
+					"Origem" : this.printId(resultItem.from),
+					"Destino" : this.printId(resultItem.to),
 					"Endereço IP (Remetente)" : this.printValue(resultItem.ip),
 					"Porta Lógica (Remetente)" : this.printValue(resultItem.port),					
 					"País" : this.printValue(this.ispData[resultItem.ispIndex].country), 

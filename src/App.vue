@@ -109,7 +109,7 @@
 									</ul>
 								</div>
 							</div>
-							
+
 							<div v-if="processedIspCount != processedData.ispList.length" class="alert mb-4 alert-warning" role="alert">
 								<div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">Loading...</span></div>
 								<span>Consultando IP's: <strong>{{ processedIspCount }}</strong> de <strong>{{ processedData.ispList.length }}</strong> </span>
@@ -119,6 +119,11 @@
 								<i class="text-danger bi bi-x-circle-fill me-3"></i>
 								<span>Não foi possível consultar <strong>{{ errorIspCount }}</strong> IP(s).</span>
 								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+
+							<div v-if="loadingWaAccount > 0" class="alert mb-4 alert-warning" role="alert">
+								<div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">Loading...</span></div>
+								<span>Consultando perfis WhatsApp: <strong>{{ loadedWaAccount }}</strong> de <strong>{{ processedData.contactList.length }}</strong> </span>
 							</div>
 
 							<div class="mb-3">
@@ -154,10 +159,10 @@
 									</a>
 								</li>
 								<li class="nav-item">
-									<a href="#" class="nav-link link-body-emphasis disabled opacity-25">										
+									<router-link to="/view" :class="[$route.name === 'ViewPage' ? 'nav-link active' : 'nav-link link-body-emphasis']" aria-current="page">
 										<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#view"></use></svg>
-										Visualização (Em breve)
-									</a>
+										Visualização
+									</router-link>
 								</li>
 							</ul>
 
@@ -165,6 +170,14 @@
 
 							<ul class="nav nav-pills flex-column mb-3">
 								<li class="nav-item">
+									<a href="#" class="nav-link link-body-emphasis" aria-current="page" data-bs-toggle="modal" data-bs-target="#apiModal">
+										<i class="bi bi-code-square me-2" />
+										Carregar API WhatsApp
+									</a>
+									<a href="#" class="nav-link link-body-emphasis" aria-current="page">
+										<i class="bi bi-floppy me-2" />
+										Salvar
+									</a>
 									<router-link to="/" class="nav-link link-body-emphasis" aria-current="page">
 										<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#restart"></use></svg>
 										Reiniciar
@@ -174,16 +187,38 @@
 						</div>
 					</div>					
 				</div>				
-				<div class="bg-body-tertiary w-100 overflow-auto p-4">
-					<router-view 
+				<div class="bg-body-tertiary w-100 overflow-auto">
+					<div class="d-flex flex-column h-100">
+						<router-view 
 						:processedData="processedData" 
 						:selectedTimezone="selectedTimezone"
 						@updateProcessedData="updateProcessedData" />
-					<p class="text-muted small text-center mt-3">Desenvolvido por <a target="_blank" href="https://github.com/italofds">Ítalo Santos</a> | © 2024 | Licença GPL-3.0 | Hospedado pelo GitHub Pages | Contribua: <a target="_blank" href="https://github.com/italofds/whatsapp-extract-processor">github.com/italofds/whatsapp-extract-processor</a></p>	
+
+						<p class="text-muted small text-center py-3 mb-0">Desenvolvido por <a target="_blank" href="https://github.com/italofds">Ítalo Santos</a> | © 2024 | Licença GPL-3.0 | Hospedado pelo GitHub Pages | Contribua: <a target="_blank" href="https://github.com/italofds/whatsapp-extract-processor">github.com/italofds/whatsapp-extract-processor</a></p>	
+					</div>
 				</div>
 			</div>
 		</main>
 	</div>
+
+	<div class="modal fade" id="apiModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Consulta Dados</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="inputApiKey" class="form-label">Chave da API</label>
+                    <input v-model="apiKey" type="text" class="form-control" id="inputApiKey">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary"  data-bs-dismiss="modal" @click="fetchWaData()">Consultar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -199,6 +234,7 @@ export default {
 	name: 'App',
 	data() {
 		return { 
+			apiKey: null,
 			processedData: null,	
 			selectedTimezone: -new Date().getTimezoneOffset()
 		};
@@ -233,6 +269,22 @@ export default {
 			if(this.processedData && this.processedData.ispList) {
 				return this.processedData.ispList.filter(function (obj) {
 					return obj.status != "loading";
+				}).length;
+			}
+			return 0;
+		},
+		loadedWaAccount: function() {
+			if(this.processedData && this.processedData.contactList) {
+				return this.processedData.contactList.filter(function (obj) {
+					return obj.status == "success";
+				}).length;
+			}
+			return 0;
+		},
+		loadingWaAccount: function() {
+			if(this.processedData && this.processedData.contactList) {
+				return this.processedData.contactList.filter(function (obj) {
+					return obj.status == "loading";
 				}).length;
 			}
 			return 0;
@@ -283,20 +335,9 @@ export default {
 			this.processedData = data;	
 
 			if(data) {
-				var ipList = [];
-
-				if(data.messageLogs) {
-					ipList = ipList.concat(...data.messageLogs);
-				}
-
-				for(let call of (data.callLogs||[])) {
-					for(let event of (call.events||[])) {
-						ipList.push(event);
-					}		
-				}
-
-				this.processedData.ispList = this.generateIspList(ipList);
-				this.fetchData();
+				this.processedData.ispList = this.generateIspList();
+				this.processedData.contactList = this.generateContactList();
+				this.fetchIspData();
 			}			
 		},
 		convertDatetimeFormat: function (dateValue, format) {
@@ -308,8 +349,19 @@ export default {
 				return timeText;
 			}
 		},
-		generateIspList(ipList) {
+		generateIspList() {
+			var ipList = [];
 			const resultIspList = [];
+
+			if(this.processedData.messageLogs) {
+				ipList = ipList.concat(...this.processedData.messageLogs);
+			}
+
+			for(let call of (this.processedData.callLogs||[])) {
+				for(let event of (call.events||[])) {
+					ipList.push(event);
+				}		
+			}		
 
 			for(let resultItem of ipList) {
 				var resultIp = resultItem.ip;
@@ -353,7 +405,32 @@ export default {
 
 			return resultIspList;
 		},
-		async fetchData() {
+		generateContactList() {
+			var waAccountMsgList;
+			var waAccountCallList;
+
+			if(this.processedData?.messageLogs) {
+				waAccountMsgList = [...new Set(this.processedData.messageLogs
+					.filter(item => item.msgStyle === 'individual')
+					.map(item => item.sender != this.processedData.requestParams.accountId ? item.sender : item.recipients)
+				)];
+			}
+
+			if(this.processedData?.callLogs) {
+				waAccountCallList = [...new Set(this.processedData.callLogs
+					.map(item => item.events[0].from != this.processedData.requestParams.accountId ? item.events[0].from : item.events[0].to)
+				)];
+			}
+
+			return [...new Set([...waAccountMsgList, ...waAccountCallList])]
+				.map(item => {
+					return {
+						accountId: item,
+						status: ""
+					}
+				});
+		},
+		async fetchIspData() {
 			if(this.processedData && this.processedData.ispList) {
 				for(let item of this.processedData.ispList){
 					try {
@@ -372,11 +449,50 @@ export default {
 						
 					} catch (error) {
 						item.status = "error"
-						console.error('Ocorreu um erro durante a busca dos dados: ', error);
+						console.error('Ocorreu um erro durante a busca dos dados de IPs: ', error);
 					}	
 				}	
 			}			
-		}
+		},
+		async fetchWaData() {
+			if(this.processedData && this.processedData.contactList) {
+				for(let item of this.processedData.contactList){
+					try {
+						if(this.processedData) {
+							item.status = "loading";
+
+							const options = {
+								method: 'GET',
+								url: 'https://whatsapp-data1.p.rapidapi.com/number/' + item.accountId,
+								headers: {
+									'x-rapidapi-key': this.apiKey,
+									'x-rapidapi-host': 'whatsapp-data1.p.rapidapi.com'
+								}
+							};
+
+							const response = await axios.request(options);
+
+							item.status = "success";
+
+							if(response?.data?.profilePic) {
+								item.profilePic = response.data.profilePic;
+							}
+							if(response?.data?.isBusiness) {
+								item.isBusiness = response.data.isBusiness;
+								item.description = response.data.businessProfile?.description;
+							}
+							if(response?.data?.about) {
+								item.about = response.data.about;
+							}			
+						}
+						
+					} catch (error) {
+						item.status = "error"
+						console.error('Ocorreu um erro durante a fazer consulta na API do WhatsApp: ', error);
+					}	
+				}
+			}            
+        } 
 	}
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="p-4 pb-0">
         <h1 class="mb-4">Registros de Chamadas</h1>
 
         <div class="card mb-4 rounded-3 shadow-sm">
@@ -17,7 +17,7 @@
                 <button class="btn btn-outline-secondary ms-3" @click="$refs.listComponent.exportExcel()">Exportar Excel</button>
             </h4>
             <div class="card-body">
-                <list-component ref="listComponent" :ipData="callLogs" :ispData="ispList" :timezoneData="selectedTimezone"></list-component>
+                <list-component ref="listComponent" :ipData="callLogs" :ispData="ispList" :timezoneData="selectedTimezone" :contactData="processedData?.contactList"></list-component>
             </div>
         </div>        
     </div>
