@@ -174,7 +174,9 @@
 										<i class="bi bi-code-square me-2" />
 										Carregar API WhatsApp
 									</a>
-									<a href="#" class="nav-link link-body-emphasis" aria-current="page">
+									<a class="nav-link link-body-emphasis" aria-current="page" 
+										:href="jsonData"
+										:download="`WA_${processedData.requestParams.accountId}_from_${formatDate(startDate, 'YYYYMMDD', selectedTimezone)}_to_${formatDate(finalDate, 'YYYYMMDD', selectedTimezone)}.json`">
 										<i class="bi bi-floppy me-2" />
 										Salvar
 									</a>
@@ -268,7 +270,7 @@ export default {
 		processedIspCount: function() {
 			if(this.processedData && this.processedData.ispList) {
 				return this.processedData.ispList.filter(function (obj) {
-					return obj.status != "loading";
+					return obj.status != "";
 				}).length;
 			}
 			return 0;
@@ -326,6 +328,14 @@ export default {
 			}, new Set);
 
 			return uniqueOffsets.sort((a,b) => a.id - b.id);		
+		},
+		jsonData: function() {
+			if(this.processedData) {
+				const jsonString = JSON.stringify(this.processedData, null, 2);
+				const blob = new Blob([jsonString], { type: 'application/json' });
+				return URL.createObjectURL(blob);
+			}
+			return null;
 		}
 	},
 	methods: {
@@ -389,10 +399,10 @@ export default {
 					ispItem.country = "";
 					ispItem.region = "";
 					ispItem.city = "";
-					ispItem.lat = null;
-					ispItem.lng = null;
-					ispItem.isp = "NÃO CONSULTADO";
-					ispItem.status = "loading";					
+					ispItem.lat = "";
+					ispItem.lng = "";
+					ispItem.isp = "";
+					ispItem.status = "";					
 
 					resultIspList.push(ispItem);	
 					ispIndex = resultIspList.length-1;
@@ -435,6 +445,8 @@ export default {
 				for(let item of this.processedData.ispList){
 					try {
 						if(this.processedData) {
+							item.status = "loading";
+
 							var url  = process.env.VUE_APP_IP_API_URL + item.ip + "/" + this.convertDatetimeFormat(item.timestamp, "YYYY-MM-DD");
 							const response = await axios.get(url);
 

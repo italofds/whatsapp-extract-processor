@@ -269,12 +269,17 @@ function formatIP(IPAddressRaw){
 		var arrayIPPartsFormated = [];
 		
 		for (let ipPart of arrayIPParts) {
-			if(ipPart.length < 2) {
-				ipPart = "000" + ipPart;
-			} else if(ipPart.length < 3) {
-				ipPart = "00" + ipPart;
-			} else if(ipPart.length < 4) {
+			if(ipPart.length == 3) {
 				ipPart = "0" + ipPart;
+			} else if(ipPart.length == 2) {
+				ipPart = "00" + ipPart;
+			} else if(ipPart.length == 1) {
+				ipPart = "000" + ipPart;
+			} else if(ipPart.length == 0) {
+				// Count how many blocks are remaining to 8 blocks of IPv6
+				var count = 8 - (arrayIPParts.length - 1); 
+				ipPart += ("0000:").repeat(count);
+				ipPart = ipPart.slice(0, -1);
 			}
 			
 			arrayIPPartsFormated.push(ipPart);
