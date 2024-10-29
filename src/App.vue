@@ -204,13 +204,21 @@
 	</div>
 
 	<div class="modal fade" id="apiModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Consulta Dados</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+					<div class="alert mb-3 alert-info" role="alert">
+						<div class="h4 d-flex align-items-center">
+							<i class="bi bi-info-circle-fill me-2"></i> 
+							<span>Informação:</span>
+						</div>
+						<p>Essa ferramenta utiliza a API <strong>CheckLeaked</strong> para consultar informações públicas de perfis do WhatsApp.</p>
+						<p>Para mais informações sobre como usar e como obter uma chave de API, acesse o site: <a href="https://whatsapp.checkleaked.cc/" target="_blank">whatsapp.checkleaked.cc</a></p>
+					</div>
                     <label for="inputApiKey" class="form-label">Chave da API</label>
                     <input v-model="apiKey" type="text" class="form-control" id="inputApiKey">
                 </div>
