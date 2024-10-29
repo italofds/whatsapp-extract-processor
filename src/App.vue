@@ -152,12 +152,12 @@
 										Registros de Chamadas
 									</router-link>
 								</li>
-								<!-- <li class="nav-item">
-									<a href="#" class="nav-link link-body-emphasis disabled opacity-25">
+								<li class="nav-item">
+									<router-link to="/charts" :class="[$route.name === 'ChartsPage' ? 'nav-link active' : 'nav-link link-body-emphasis']" aria-current="page">
 										<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#chart"></use></svg>
-										Gráficos (Em breve)
-									</a>
-								</li> -->
+										Gráficos
+									</router-link>
+								</li>
 								<li class="nav-item">
 									<router-link to="/view" :class="[$route.name === 'ViewPage' ? 'nav-link active' : 'nav-link link-body-emphasis']" aria-current="page">
 										<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#view"></use></svg>

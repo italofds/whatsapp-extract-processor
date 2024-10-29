@@ -1,7 +1,7 @@
 <template>
-    <div class="card mb-4 rounded-3 shadow-sm">
-        <div class="card-header py-3">
-            <h4 class="my-0 fw-normal">{{ this.title}}</h4>
+    <div class="card rounded-3 shadow-sm mb-4">
+        <div class="card-header">
+            <h4 class="card-title">{{ title }}</h4>
         </div>
         <div class="card-body">
             <canvas ref="canvas" style="max-height:400px;"></canvas>
@@ -47,6 +47,9 @@ export default {
             if(this.chart) {
                 this.chart.data = this.data;
                 this.chart.update();
+
+            } else {
+                this.createChart();
             }
         },
         createChart() {
@@ -54,19 +57,21 @@ export default {
                 this.chart.destroy();
             }
 
-            const chartObj = new Chart(this.$refs.canvas.getContext('2d'), {
-                type: this.type,
-                data: this.data,
-                options: {
-                    plugins: {
-                        legend: {
-                            position: "right"
+            if(this.data) {
+                const chartObj = new Chart(this.$refs.canvas.getContext('2d'), {
+                    type: this.type,
+                    data: this.data,
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: "right"
+                            }
                         }
                     }
-                }
-            });          
-            
-            this.chart = markRaw(chartObj);
+                });
+                
+                this.chart = markRaw(chartObj);
+            }            
         }
     },
     beforeUnmount() {
