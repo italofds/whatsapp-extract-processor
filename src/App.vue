@@ -344,9 +344,15 @@ export default {
 		updateProcessedData(data) {
 			this.processedData = data;	
 
-			if(data) {
-				this.processedData.ispList = this.generateIspList();
-				this.processedData.contactList = this.generateContactList();
+			if(this.processedData) {
+				if(!this.processedData.ispList) {
+					this.processedData.ispList = this.generateIspList();
+				}
+
+				if(!this.processedData.contactList) {
+					this.processedData.contactList = this.generateContactList();
+				}			
+				
 				this.fetchIspData();
 			}			
 		},
@@ -396,13 +402,13 @@ export default {
 					let ispItem = {};
 					ispItem.ip = resultIp;
 					ispItem.timestamp = resultDate;
-					ispItem.country = "";
+					/* ispItem.country = "";
 					ispItem.region = "";
 					ispItem.city = "";
 					ispItem.lat = "";
 					ispItem.lng = "";
 					ispItem.isp = "";
-					ispItem.status = "";					
+					ispItem.status = "";	 */				
 
 					resultIspList.push(ispItem);	
 					ispIndex = resultIspList.length-1;
@@ -442,9 +448,9 @@ export default {
 		},
 		async fetchIspData() {
 			if(this.processedData && this.processedData.ispList) {
-				for(let item of this.processedData.ispList){
-					try {
-						if(this.processedData) {
+				for(let item of this.processedData.ispList) {
+					if(!item.status) {
+						try {
 							item.status = "loading";
 
 							var url  = process.env.VUE_APP_IP_API_URL + item.ip + "/" + this.convertDatetimeFormat(item.timestamp, "YYYY-MM-DD");
@@ -457,20 +463,20 @@ export default {
 							item.lat = response.data.location.lat;
 							item.lng = response.data.location.lng;
 							item.status = "success";
-						}
-						
-					} catch (error) {
-						item.status = "error"
-						console.error('Ocorreu um erro durante a busca dos dados de IPs: ', error);
-					}	
+							
+						} catch (error) {
+							item.status = "error"
+							console.error('Ocorreu um erro durante a busca dos dados de IPs: ', error);
+						}	
+					}					
 				}	
 			}			
 		},
 		async fetchWaData() {
 			if(this.processedData && this.processedData.contactList) {
 				for(let item of this.processedData.contactList){
-					try {
-						if(this.processedData) {
+					if(!item.status) {
+						try {
 							item.status = "loading";
 
 							const options = {
@@ -495,13 +501,13 @@ export default {
 							}
 							if(response?.data?.about) {
 								item.about = response.data.about;
-							}			
+							}
+							
+						} catch (error) {
+							item.status = "error"
+							console.error('Ocorreu um erro durante a fazer consulta na API do WhatsApp: ', error);
 						}
-						
-					} catch (error) {
-						item.status = "error"
-						console.error('Ocorreu um erro durante a fazer consulta na API do WhatsApp: ', error);
-					}	
+					}						
 				}
 			}            
         } 
