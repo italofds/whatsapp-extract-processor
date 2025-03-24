@@ -457,7 +457,7 @@ export default {
 		async fetchIspData() {
 			if(this.processedData && this.processedData.ispList) {
 				for(let item of this.processedData.ispList) {
-					if(!item.status) {
+					if(item.ip && !item.status) {
 						try {
 							item.status = "loading";
 

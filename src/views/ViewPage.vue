@@ -119,10 +119,10 @@
                                 <div class="text-end w-100">
                                     <small class="text-muted" style="font-size: 75%;">{{ message.senderDevice }}</small>
                                 </div>
-                                <div class="text-end w-100">
+                                <div v-if="message.ip" class="text-end w-100">
                                     <small class="text-muted" style="font-size: 75%;">{{ message.ip + "/" + message.port }}</small>
                                 </div>
-                                <div v-if="ispList" class="text-end w-100">
+                                <div v-if="message.ispIndex && ispList" class="text-end w-100">
                                     <small class="text-muted" style="font-size: 75%;">{{ ispList?.[message.ispIndex].isp }}</small>
                                 </div>                            
                                 <div class="text-end w-100">
@@ -189,8 +189,8 @@
                                                 <small class='float-end' title="Hora do Evento">{{ formatDate(event.timestamp, "HH:mm:ss", selectedTimezone) }}</small>
                                                 <small class="mb-3 text-muted">
                                                     <div title="Origem">{{ formatPhoneNumber(event.from) }}</div>
-                                                    <div title="Endereço IP e Porta Lógica">{{ event.ip + "/" + event.port  }}</div>
-                                                    <div title="Provedor">{{ printValue(ispList?.[event.ispIndex].isp)  }}</div>
+                                                    <div v-if="event.ip" title="Endereço IP e Porta Lógica">{{ event.ip + "/" + event.port  }}</div>
+                                                    <div v-if="ispList && event.ispIndex" title="Provedor">{{ printValue(ispList?.[event.ispIndex].isp)  }}</div>
                                                 </small>                                                
                                             </li>
                                         </ul>

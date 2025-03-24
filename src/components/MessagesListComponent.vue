@@ -158,10 +158,12 @@ export default {
 		formatDate,
 		formatPhoneNumber,
 		isMultipleRecipients(recipients) {
-			var recipientsArray = recipients.split(",");
-			if(recipientsArray && recipientsArray.length > 1) {
-				return true;
-			}
+			if(recipients) {
+				var recipientsArray = recipients.split(",");
+				if(recipientsArray && recipientsArray.length > 1) {
+					return true;
+				}
+			}			
 			return false;
 		},
 		restartList() {

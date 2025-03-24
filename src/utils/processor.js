@@ -91,7 +91,7 @@ function getMessageLogs(text) {
 	const timestampRegex = /Timestamp(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})UTCMessageId/;
 	const msgIdRegex = /MessageId(.*?)Sender/;
 	const senderRegex = /Sender(.*?)Recipients/;
-	const recipientsRegex = /Recipients(.*?)(?=SenderIp|GroupId)/;
+	const recipientsRegex = /Recipients(.*?)(?=SenderIp|GroupId|SenderDevice)/;
 	const groupIdRegex = /GroupId(.*?)SenderIp/;
 	const senderIpRegex = /SenderIp(.*?)SenderPort/;
 	const senderPortRegex = /SenderPort(.*?)SenderDevice/;
@@ -176,7 +176,7 @@ function getCallLogs(text) {
 	const eventTypeRegex = /Type(.*?)Timestamp/;
 	const eventTimestampRegex = /Timestamp(\d{4}-\d{2}-\d{2})(\d{2}:\d{2}:\d{2})UTCFrom/;
 	const eventFromRegex = /From(.*?)To/;
-	const eventToRegex = /To(.*?)FromIp/;
+	const eventToRegex = /To(.*?)(?=FromIp|Media|$)/;
 	const eventFromIpRegex = /FromIp(.*?)FromPort/;
 	const eventFromPortRegex = /FromPort(.*?)(?=Media|$)/;
 	const eventMediaTypeRegex = /Media(.*)/;
