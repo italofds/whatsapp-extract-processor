@@ -21,16 +21,32 @@
             <div v-if="activePanel == 'conversations'" class="d-flex flex-column border-end" style="width: 400px; min-height: 0;">
                 <h4 class="p-3">Conversas</h4>
 
+                <div class="input-group px-3 mb-3">
+                    <span class="input-group-text" id="basic-addon1"><svg class="bi"><use href="#search"></use></svg></span>
+                    <input v-model="chatFilter" type="text" class="form-control" placeholder="Pesquisar conversas" aria-label="Pesquisar conversas">
+                </div>
+
+                <div class="px-3 mb-3">
+                    <input type="radio" class="btn-check" name="radioFilter" id="btnradioall" value="" v-model="chatTypeFilter" >
+                    <label class="btn btn-sm btn-outline-secondary rounded-pill me-2" for="btnradioall">Tudo</label>
+
+                    <input type="radio" class="btn-check" name="radioFilter" id="btnradioindividual" value="individual" v-model="chatTypeFilter">
+                    <label class="btn btn-sm btn-outline-secondary rounded-pill me-2" for="btnradioindividual">Contatos</label>
+
+                    <input type="radio" class="btn-check" name="radioFilter" id="btnradiogroup" value="group" v-model="chatTypeFilter">
+                    <label class="btn btn-sm btn-outline-secondary rounded-pill" for="btnradiogroup">Grupos</label>
+                </div>
+
                 <div class="flex-grow-1 overflow-auto" style="min-height: 0;">
                     <div class="list-group list-group-flush">
-                        <div v-for="(conversation, index) in groupedMessages" 
+                        <div v-for="(conversation, index) in filteredMessages" 
                             role="button"
                             :key="index" 
                             :class="['list-group-item list-group-item-action d-flex flex-row p-3', { 'bg-body-secondary': conversation.id == activeTarget?.id }]" 
                             @click="selectTarget(conversation)">
                             <div data-bs-toggle="modal" data-bs-target="#profileModal" role="button" @click="selectActiveContact(conversation.id)">
-                                <svg v-if="!getProfilePic(conversation.id)" class="bi thumnail-picture me-2"><use :href="'#' + conversation.msgStyle"></use></svg>
-                                <img v-if="getProfilePic(conversation.id)" class="thumnail-picture me-2" :src="getProfilePic(conversation.id)" />
+                                <svg v-if="!getProfilePic(conversation.id)" class="bi thumbnail-picture me-2"><use :href="'#' + conversation.msgStyle"></use></svg>
+                                <img v-if="getProfilePic(conversation.id)" class="thumbnail-picture me-2" :src="getProfilePic(conversation.id)" />
                             </div>                            
                             <div class="flex-fill align-self-center d-flex flex-column">
                                 <span class="conversation-id">{{ printId(conversation) }}</span>
@@ -52,16 +68,21 @@
             <div v-if="activePanel == 'calls'" class="d-flex flex-column border-end" style="width: 400px; min-height: 0;">
                 <h4 class="p-3">Ligações</h4>
 
+                <div class="input-group px-3 mb-3">
+                    <span class="input-group-text" id="basic-addon1"><svg class="bi"><use href="#search"></use></svg></span>
+                    <input v-model="callFilter" type="text" class="form-control" placeholder="Pesquisar chamadas" aria-label="Pesquisar chamadas">
+                </div>
+
                 <div class="flex-grow-1 overflow-auto" style="min-height: 0;">
                     <div class="list-group list-group-flush">
-                        <div v-for="(groupedCall, index) in groupedCalls" 
+                        <div v-for="(groupedCall, index) in filteredCalls" 
                             role="button"
                             :key="index" 
                             :class="['list-group-item list-group-item-action d-flex flex-row p-3', { 'bg-body-secondary': groupedCall.calls[0].callId == activeTarget?.calls[0].callId }]"
                             @click="selectTarget(groupedCall)">
                             <div data-bs-toggle="modal" data-bs-target="#profileModal" role="button" @click="selectActiveContact(groupedCall.interlocutor)">
-                                <svg v-if="!getProfilePic(groupedCall.interlocutor)" class="bi thumnail-picture me-2"><use href="#individual"></use></svg>
-                                <img v-if="getProfilePic(groupedCall.interlocutor)" class="thumnail-picture me-2" :src="getProfilePic(groupedCall.interlocutor)" />
+                                <svg v-if="!getProfilePic(groupedCall.interlocutor)" class="bi thumbnail-picture me-2"><use href="#individual"></use></svg>
+                                <img v-if="getProfilePic(groupedCall.interlocutor)" class="thumbnail-picture me-2" :src="getProfilePic(groupedCall.interlocutor)" />
                             </div>                           
                             <div class="flex-fill align-self-center d-flex flex-column">
                                 <div :class="['conversation-id', {'text-danger': !groupedCall.calls[0].answered && groupedCall.calls[0].direction == 'incoming' }]">
@@ -86,8 +107,8 @@
             <div v-if="activeTarget && activePanel == 'conversations'" class="flex-fill d-flex flex-column border-end" style="min-height: 0;">
                 <div class="bg-body-secondary p-3 d-flex flex-row border-bottom rounded-3 rounded-start-0 rounded-bottom-0">
                     <div data-bs-toggle="modal" data-bs-target="#profileModal" role="button" @click="selectActiveContact(activeTarget.id)">
-                        <svg v-if="!getProfilePic(activeTarget.id)" class="bi thumnail-picture me-2"><use :href="'#' + activeTarget.msgStyle"></use></svg>                     
-                        <img v-if="getProfilePic(activeTarget.id)" class="thumnail-picture me-2" :src="getProfilePic(activeTarget.id)" />
+                        <svg v-if="!getProfilePic(activeTarget.id)" class="bi thumbnail-picture me-2"><use :href="'#' + activeTarget.msgStyle"></use></svg>                     
+                        <img v-if="getProfilePic(activeTarget.id)" class="thumbnail-picture me-2" :src="getProfilePic(activeTarget.id)" />
                     </div>                    
                     <span class=" align-self-center">{{ printId(activeTarget) }}</span>
                 </div>
@@ -141,8 +162,8 @@
             <div v-if="activeTarget && activePanel == 'calls'" class="flex-fill d-flex flex-column border-end" style="min-height: 0;">
                 <div class="bg-body-secondary p-3 d-flex flex-row border-bottom rounded-3 rounded-start-0 rounded-bottom-0">
                     <div data-bs-toggle="modal" data-bs-target="#profileModal" role="button" @click="selectActiveContact(activeTarget.interlocutor)">
-                        <svg v-if="!getProfilePic(activeTarget.interlocutor)" class="bi thumnail-picture me-2"><use href="#individual"></use></svg>
-                        <img v-if="getProfilePic(activeTarget.interlocutor)" class="thumnail-picture me-2" :src="getProfilePic(activeTarget.interlocutor)" />
+                        <svg v-if="!getProfilePic(activeTarget.interlocutor)" class="bi thumbnail-picture me-2"><use href="#individual"></use></svg>
+                        <img v-if="getProfilePic(activeTarget.interlocutor)" class="thumbnail-picture me-2" :src="getProfilePic(activeTarget.interlocutor)" />
                     </div>                    
                     <span class=" align-self-center">{{ printId({'msgStyle': 'individual','id': activeTarget.interlocutor}) }}</span>
                 </div>
@@ -236,6 +257,9 @@
         <symbol id="document" viewBox="0 0 13 20">
             <path fill="currentColor" d="M10.2,3H2.5C1.7,3,1,3.7,1,4.5v10.1C1,15.3,1.7,16,2.5,16h7.7c0.8,0,1.5-0.7,1.5-1.5v-10 C11.6,3.7,11,3,10.2,3z M7.6,12.7H3.5v-1.3h4.1V12.7z M9.3,10H3.5V8.7h5.8V10z M9.3,7.3H3.5V6h5.8V7.3z"></path>
         </symbol>
+        <symbol id="search" viewBox="0 0 16 16">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+        </symbol>
     </svg>
 
     <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
@@ -314,10 +338,35 @@ export default {
             activeTarget: null,
             activePanel: 'conversations',
             apiKey: null,
-            processedWaCount: 0
+            processedWaCount: 0,
+            chatFilter: '',
+            chatTypeFilter: '',
+            callFilter: ''
         }
     },
     computed: {
+        filteredMessages: function() {
+            var resultMessages = this.groupedMessages;
+
+            if(this.chatFilter) {
+                resultMessages = this.groupedMessages.filter(item => item.id.includes(this.chatFilter));
+            }
+
+            if(this.chatTypeFilter) {
+                resultMessages = this.groupedMessages.filter(item => item.msgStyle == this.chatTypeFilter);
+            }
+            
+            return resultMessages;
+        },
+        filteredCalls: function() {
+            var resultCalls = this.groupedCalls;
+
+            if(this.callFilter) {
+                resultCalls = this.groupedCalls.filter(item => item.interlocutor.includes(this.callFilter));
+            }
+            
+            return resultCalls;
+        },
         groupedMessages: function() {
             if(this.processedData) {                
                 const groups = {};    
@@ -636,7 +685,7 @@ function processCall(call, target) {
         overflow: hidden;
         white-space: nowrap;
     }
-    .thumnail-picture {
+    .thumbnail-picture {
         width: 50px;
         height: 50px;
         border-radius: 50%;
