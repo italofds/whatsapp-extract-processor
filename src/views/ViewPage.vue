@@ -453,6 +453,8 @@ export default {
                     }
                 }
 
+                console.log("GROUPED CALLS");
+                console.log(groupedCalls);
                 return groupedCalls;
             }
             return null;
@@ -607,24 +609,20 @@ export default {
 };
 
 function processCall(call, target) {
-    // Find the "offer" event
-    var offerEvent = call.events.find(event => event.type === 'offer');
-    if (!offerEvent) {
-        // No offer event, skip this call
-        return null;
-    }
+    // Find first event
+    var firstEvent = call.events[0];
     
     // Determine direction and interlocutor
     var direction;
     var interlocutor;
-    if (offerEvent.from === target) {
+    if (firstEvent.from === target) {
         // Target originated the call
         direction = 'outgoing';
-        interlocutor = offerEvent.to;
-    } else if (offerEvent.to === target) {
+        interlocutor = firstEvent.to;
+    } else if (firstEvent.to === target) {
         // Target received the call
         direction = 'incoming';
-        interlocutor = offerEvent.from;
+        interlocutor = firstEvent.from;
     } else {
         // Neither from nor to is the target, skip this call
         return null;
@@ -635,7 +633,7 @@ function processCall(call, target) {
     var answered = acceptEvent ? true : false;
     
     // Find the earliest "offer" timestamp
-    var offerTime = new Date(offerEvent.timestamp);
+    var offerTime = new Date(firstEvent.timestamp);
     
     // Find the latest "terminate" timestamp
     var terminateEvents = call.events.filter(event => event.type === 'terminate');

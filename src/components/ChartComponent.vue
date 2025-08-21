@@ -24,7 +24,8 @@ export default {
         title: {
             type: String,
             default: 'Título'
-        }
+        },
+        options: null
     },
     data() {
         return {
@@ -61,13 +62,7 @@ export default {
                 const chartObj = new Chart(this.$refs.canvas.getContext('2d'), {
                     type: this.type,
                     data: this.data,
-                    options: {
-                        plugins: {
-                            legend: {
-                                position: "right"
-                            }
-                        }
-                    }
+                    options: this.options
                 });
                 
                 this.chart = markRaw(chartObj);

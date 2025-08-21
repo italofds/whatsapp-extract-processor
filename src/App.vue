@@ -278,7 +278,7 @@ export default {
 		processedIspCount: function() {
 			if(this.processedData && this.processedData.ispList) {
 				return this.processedData.ispList.filter(function (obj) {
-					return obj.status != "";
+					return obj.status == "success" || obj.status == "error";
 				}).length;
 			}
 			return 0;
@@ -426,6 +426,9 @@ export default {
 					resultItem.ispIndex = ispIndex;
 				}				
 			}
+
+			console.log("RESULT ISP LIST");
+			console.log(resultIspList);
 
 			return resultIspList;
 		},
