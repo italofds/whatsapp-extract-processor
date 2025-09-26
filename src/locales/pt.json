@@ -1,0 +1,46 @@
+{
+  "home": {
+    "title": "Processador de Interceptação do WhatsApp",
+    "intro1": "Ferramenta de processamento para tratar as respostas da empresa <strong>WhatsApp LLC</strong> acerca das mensagens e chamadas do aplicativo <strong>WhatsApp</strong> solicitadas judicialmente.",
+    "intro2": "Para isso, é necessário que o usuário informe os arquivos do tipo <strong>\".html\"</strong> de um <strong>mesmo alvo</strong> a serem processados. Após o processamento, todos os registros de mensagens e chamadas respondidos pela empresa constarão em um formato otimizado para análise, com data e hora convertidos pro fuso horário selecionado, além de constar também informações dos provedores de conexão dos respectivos endereços IP.",
+    "alert1": "<strong>Atenção!</strong> Todo o processamento primário é feito <strong>localmente</strong> no seu navegador. Nenhum dado sensível é enviado para servidores externos. Apenas as consultas de endereços IP dependem de acesso à Internet.",
+    "alert2": "Se ainda restar dúvidas quanto a segurança dos dados, <strong>experimente processar os arquivos com a Internet <u>desconectada.</u></strong>",    
+    "processButton": "Processar",
+    "processingAlert": "Processando arquivos: {progress}%",
+    "readJson": "Leia um arquivo .JSON já processado e configurado pelo usuário.",
+    "selectJsonButton": "Selecionar Arquivo"
+  }
+  ,
+  "app": {
+    "theme": "Alterar Tema",
+    "themeLight": "Claro",
+    "themeDark": "Escuro",
+    "themeAuto": "Auto",
+    "menu": "Menu",
+    "callExtract": "Extrato de Chamadas/Mensagens",
+    "targetPhone": "(Tel. Alvo)",
+    "msgRecords": "registros de mensagens",
+    "callRecords": "registros de chamadas",
+    "fromTo": "De {start} a {end}",
+    "consultingIps": "Consultando IP's: {count} de {total}",
+    "consultingIpsError": "Não foi possível consultar {count} IP(s).",
+    "consultingWaProfiles": "Consultando perfis WhatsApp: {count} de {total}",
+    "timezone": "Fuso Horário",
+    "messagesTab": "Registros de Mensagens",
+    "callsTab": "Registros de Chamadas",
+    "chartsTab": "Gráficos",
+    "viewTab": "Visualização",
+    "loadApi": "Carregar API WhatsApp",
+    "save": "Salvar",
+    "restart": "Reiniciar",
+    "footer": "Desenvolvido por <a target=\"_blank\" href=\"https://github.com/italofds\">Ítalo Santos</a> &#124; © 2024 &#124; Licença GPL-3.0 &#124; Hospedado pelo GitHub Pages &#124; Contribua: <a target=\"_blank\" href=\"https://github.com/italofds/whatsapp-extract-processor\">github.com/italofds/whatsapp-extract-processor</a>",
+    "modalTitle": "Consulta Dados",
+    "modalInfoTitle": "Informação:",
+    "modalInfoText1": "Essa ferramenta utiliza a API <strong>CheckLeaked</strong> para consultar informações públicas de perfis do WhatsApp.",
+    "modalInfoText2": "Para mais informações sobre como usar e como obter uma chave de API, acesse o site: <a href=\"https://whatsapp.checkleaked.cc/\" target=\"_blank\">whatsapp.checkleaked.cc</a>",
+    "apiKeyLabel": "Chave da API",
+    "close": "Fechar",
+    "consult": "Consultar",
+    "processingError": "Erro ao processar os arquivos. Verifique se os arquivos são do tipo correto e tente novamente."
+  }
+}

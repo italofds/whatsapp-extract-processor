@@ -1,0 +1,46 @@
+{
+  "home": {
+    "title": "WhatsApp Interception Processor",
+    "intro1": "Processing tool to handle the responses from <strong>WhatsApp LLC</strong> regarding the messages and calls from the <strong>WhatsApp</strong> application requested by court order.",
+    "intro2": "For this, the user must provide the <strong>.html</strong> files of the <strong>same target</strong> to be processed. After processing, all message and call records responded by the company will be in an optimized format for analysis, with date and time converted to the selected timezone, as well as information about the connection providers of the respective IP addresses.",
+    "alert1": "<strong>Attention!</strong> All primary processing is performed <strong>locally</strong> in your browser. No sensitive data is sent to external servers. Only IP address lookups require Internet access.",
+    "alert2": "If you still have doubts about data security, <strong>try processing the files with the Internet <u>disconnected.</u></strong>",
+    "processButton": "Process",
+    "processingAlert": "Processing files: {progress}%",
+    "readJson": "Read a .JSON file already processed and configured by the user.",
+    "selectJsonButton": "Select File"
+  }
+  ,
+  "app": {
+    "theme": "Change Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeAuto": "Auto",
+    "menu": "Menu",
+    "callExtract": "Call/Message Extract",
+    "targetPhone": "(Target Phone)",
+    "msgRecords": "message records",
+    "callRecords": "call records",
+    "fromTo": "From {start} to {end}",
+    "consultingIps": "Consulting IPs: {count} of {total}",
+    "consultingIpsError": "Could not consult {count} IP(s).",
+    "consultingWaProfiles": "Consulting WhatsApp profiles: {count} of {total}",
+    "timezone": "Timezone",
+    "messagesTab": "Message Records",
+    "callsTab": "Call Records",
+    "chartsTab": "Charts",
+    "viewTab": "Visualization",
+    "loadApi": "Load WhatsApp API",
+    "save": "Save",
+    "restart": "Restart",
+    "footer": "Developed by <a target=\"_blank\" href=\"https://github.com/italofds\">Ítalo Santos</a> &#124; © 2024 &#124; GPL-3.0 License &#124; Hosted by GitHub Pages &#124; Contribute: <a target=\"_blank\" href=\"https://github.com/italofds/whatsapp-extract-processor\">github.com/italofds/whatsapp-extract-processor</a>",
+    "modalTitle": "Data Query",
+    "modalInfoTitle": "Information:",
+    "modalInfoText1": "This tool uses the <strong>CheckLeaked</strong> API to query public information from WhatsApp profiles.",
+    "modalInfoText2": "For more information on how to use and obtain an API key, visit: <a href=\"https://whatsapp.checkleaked.cc/\" target=\"_blank\">whatsapp.checkleaked.cc</a>",
+    "apiKeyLabel": "API Key",
+    "close": "Close",
+    "consult": "Consult",
+    "processingError": "Error processing files. Please check if the files are of the correct type and try again."
+  }
+}

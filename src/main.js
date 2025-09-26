@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import VueGoogleMaps from '@fawmi/vue-google-maps';
 import router from './router';
+import i18n from './i18n'
 
 const app = createApp(App);
 app.use(router);
@@ -13,4 +14,5 @@ app.use(VueGoogleMaps, {
     key: process.env.VUE_APP_MAPS_API_KEY,
   },
 });
+app.use(i18n)
 app.mount('#app');

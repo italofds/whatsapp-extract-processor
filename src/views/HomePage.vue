@@ -2,27 +2,32 @@
     <div class="container p-4 pb-0">
         <div class="card shadow-sm">
             <div class="card-body mb-3 p-3 p-lg-5">
-                <h1 class="mb-3">Processador de Interceptação do WhatsApp</h1>
-                <p class="lead">Ferramenta de processamento para tratar as respostas da aplicativo <strong>WhatsApp</strong> acerca das mensagens e chamadas solicitadas judicialmente, especificamente através das plataformas <strong>WhatsApp Records</strong>.</p>
-                <p class="lead">Para isso, é necessário que o usuário informe <strong>os arquivos</strong> do tipo <strong>".html"</strong> de um <strong>mesmo alvo</strong> a serem processados. Após o processamento, todos os registros de mensagens e chamadas respondidos pela empresa constarão em um formato otimizado para análise, com data e hora convertidos pro fuso horário selecionado, além de constar também informações dos provedores de conexão dos respectivos endereços IP.</p>
+                <h1 class="mb-3">{{ $t('home.title') }}</h1>
+                <p class="lead" v-html="$t('home.intro1')"></p>
+                <p class="lead" v-html="$t('home.intro2')"></p>
+                <div class="alert alert-info mt-4" role="alert">
+                    <p class="lead" v-html="$t('home.alert1')"></p>
+                    <hr/>
+                    <p class="lead" v-html="$t('home.alert2')"></p>
+                </div>
 
-                <form @submit.prevent="handleFormSubmit" class="mt-5">
+                <form @submit.prevent="handleFormSubmit" class="">
                     <div class="row">
                         <div class="input-group mb-2">
                             <input v-on:change="previewFiles" id="inputFiles" name="file" type="file" class="form-control form-control-lg" aria-label="Upload" accept=".html" required multiple>
-                            <button id="btnSend" class="btn btn-primary btn-lg" type="submit">Processar</button>
+                            <button id="btnSend" class="btn btn-primary btn-lg" type="submit">{{ $t('home.processButton') }}</button>
                         </div>
                     </div>
                 </form>
 
                 <div v-if="processingProgress != null" class="alert mt-3 alert-warning" role="alert">
                     <div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">Loading...</span></div>
-                    Processando arquivos: <strong>{{ processingProgress }}%</strong>
+                    {{ $t('home.processingAlert', { progress: processingProgress }) }}
                 </div>
 
-                <p class="text-center text-muted small mt-5 pt-5 border-top separator">Leia um arquivo .JSON já processado e configurado pelo usuário.</p>
+                <p class="text-center text-muted small mt-5 pt-5 border-top separator">{{ $t('home.readJson') }}</p>
                 <div class="w-100 text-center">
-                    <label for="inputSavedFile" class="btn btn-primary btn-lg">Selecionar Arquivo</label>
+                    <label for="inputSavedFile" class="btn btn-primary btn-lg">{{ $t('home.selectJsonButton') }}</label>
                     <input v-on:change="openSavedFile" class="d-none" aria-label="Upload" id="inputSavedFile" type="file" accept=".json">
                 </div>                
             </div>
@@ -93,8 +98,15 @@ export default {
                 this.processingProgress = progress;
 
                 if (result) {
-                    this.updateProcessedData(result);
-                    this.$router.push('/messages');
+                    if(result.requestParams.accountId && (result.messageLogs.length > 0 || result.callLogs.length > 0)) {
+                        this.updateProcessedData(result);
+                        this.$router.push('/messages');
+
+                    } else {
+                        alert(this.$t('app.processingError'));
+                        this.processingProgress = null;
+                        return;
+                    }
                 }
             };
 		},
