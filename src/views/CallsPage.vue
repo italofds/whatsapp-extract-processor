@@ -1,9 +1,9 @@
 <template>
     <div class="p-4 pb-0">
-        <h1 class="mb-4">Registros de Chamadas</h1>
+        <h1 class="mb-4">{{ $t('calls.title') }}</h1>
 
         <div class="card mb-4 rounded-3 shadow-sm">
-            <h4 class="card-header py-3">Localização Aproximada dos Provedores</h4>
+            <h4 class="card-header py-3">{{ $t('calls.providersLocation') }}</h4>
             <div class="card-body">
                 <map-component ref="mapComponent" :targetMarkers="targetMarkers" :notTargetMarkers="notTargetMarkers"></map-component>
             </div>
@@ -11,8 +11,8 @@
 
         <div class="card rounded-3 shadow-sm">
             <h4 class="card-header py-3">
-                Lista Eventos de Chamadas
-                <button class="btn btn-outline-secondary ms-3" @click="$refs.listComponent.exportExcel()">Exportar Excel</button>
+                {{ $t('calls.listTitle') }}
+                <button class="btn btn-outline-secondary ms-3" @click="$refs.listComponent.exportExcel()">{{ $t('calls.exportExcel') }}</button>
             </h4>
             <div class="card-body">
                 <list-component ref="listComponent" :processedData="processedData" :timezoneData="selectedTimezone"></list-component>
@@ -22,16 +22,15 @@
 </template>
 
 <script>
-
 import MapComponent from '@/components/MapComponent.vue';
 import ListComponent from '@/components/CallListComponent.vue';
 
-export default {    
+export default {
     name: 'CallsPage',
     components: {
         MapComponent,
-		ListComponent
-	},
+        ListComponent
+    },
     props: {
         processedData: {
             type: Object,
@@ -52,15 +51,14 @@ export default {
         if(!this.processedData) {
             this.$router.push('/');
         }
-
         this.notTargetMarkers = this.notTargetMarkersPositions;
         this.targetMarkers = this.targetMarkersPositions;
     },
     computed: {
-        targetMarkersPositions: function() {
+        targetMarkersPositions() {
             return this.getCallPositions(true);
         },
-        notTargetMarkersPositions: function() {
+        notTargetMarkersPositions() {
             return this.getCallPositions(false);
         }
     },

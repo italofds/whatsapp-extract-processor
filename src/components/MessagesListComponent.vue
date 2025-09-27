@@ -4,29 +4,29 @@
 			<thead>
 				<tr>					
 					<th class="text-nowrap" scope="col">#</th>
-					<th class="text-nowrap" scope="col">ID da Mensagem</th>
-					<th class="text-nowrap text-center" scope="col">Data</th>
-					<th class="text-nowrap text-center" scope="col">Hora</th>					
-					<th class="text-nowrap" scope="col">Remetente</th>
-					<th class="text-nowrap" scope="col">Destinatário(s)</th>
-					<th class="text-nowrap text-center" scope="col">ID do Grupo</th>
-					<th class="text-nowrap" scope="col">Endereço IP (Remetente)</th>
-					<th class="text-nowrap" scope="col">Porta Lógica (Remetente)</th>
-					<th class="text-nowrap" scope="col">País</th>
-					<th class="text-nowrap" scope="col">UF</th>
-					<th class="text-nowrap" scope="col">Cidade</th>
-					<th class="text-nowrap" scope="col">ISP</th>
-					<th class="text-nowrap" scope="col">Dispositivo</th>
-					<th class="text-nowrap" scope="col">Tipo</th>
-					<th class="text-nowrap" scope="col">Estilo Mensagem</th>
-					<th class="text-nowrap" scope="col">Tamanho Mensagem</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.msgId') }}</th>
+					<th class="text-nowrap text-center" scope="col">{{ $t('messagesList.date') }}</th>
+					<th class="text-nowrap text-center" scope="col">{{ $t('messagesList.time') }}</th>					
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.sender') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.recipients') }}</th>
+					<th class="text-nowrap text-center" scope="col">{{ $t('messagesList.groupId') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.ipAddressSender') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.portSender') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.country') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.region') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.city') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.isp') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.device') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.type') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.msgStyle') }}</th>
+					<th class="text-nowrap" scope="col">{{ $t('messagesList.msgSize') }}</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr v-for="(resultObj, index) in finalList" :key="index" :class="ispList?.[resultObj.ispIndex].status">
 					<td>
 						<div v-if="ispList?.[resultObj.ispIndex].status == ''" class="spinner-border spinner-border-sm text-primary" role="status">
-							<span class="visually-hidden">Loading...</span>
+							<span class="visually-hidden">{{ $t('app.loading') }}</span>
 						</div>
 						<i v-if="ispList?.[resultObj.ispIndex].status == 'error'" class="text-danger bi bi-x-circle-fill"></i>
 						<i v-if="ispList?.[resultObj.ispIndex].status == 'success'" class="text-success bi bi-check-circle-fill"></i>
@@ -37,7 +37,7 @@
 					<td class="text-nowrap text-center">{{ formatDate(resultObj.timestamp, "HH:mm:ss", timezoneData) }}</td>					
 					<td class="text-nowrap">{{ printId(resultObj.sender) }}</td>
 					<td class="text-nowrap">
-						<a href="#" v-if="isMultipleRecipients(resultObj.recipients)">Múltiplos</a>
+						<span v-if="isMultipleRecipients(resultObj.recipients)" :title="resultObj.recipients">{{ $t('messagesList.multiple') }}</span>
 						<span v-if="!isMultipleRecipients(resultObj.recipients)">{{ printId(resultObj.recipients) }}</span>
 					</td>
 					<td class="text-nowrap text-center">{{ printValue(resultObj.groupId) }}</td>
@@ -56,7 +56,7 @@
 		</table>
 	</div>
 
-	<p class="text-center">Exibindo registros do {{firstVisibleItem}} ao {{lastVisibleItem}}.</p>
+	<p class="text-center mt-3">{{ $t('app.showingRecords') }} {{firstVisibleItem}} {{ $t('app.to') }} {{lastVisibleItem}}.</p>
 
 	<div class="d-flex justify-content-center">
 		<div class="row row-cols-lg-auto g-3 mb-3">
@@ -74,7 +74,7 @@
 
 			<div class="col-12 d-grid d-lg-block">
 				<div class="input-group">
-					<div class="input-group-text" id="btnGroupAddon">Nº Página:</div>
+					<div class="input-group-text" id="btnGroupAddon">{{ $t('app.pageNumber') }}</div>
 					<input v-model="currentPage" type="number" class="form-control text-center" step="1" min="1" :max="maxPages" aria-label="List Page" aria-describedby="List Page">
 				</div>
 			</div>
@@ -202,30 +202,30 @@ export default {
 
 			for(let resultItem of this.messageLogs) {
 				var exportData = {
-					"ID da Mensagem" : this.printValue(resultItem.msgId),
-					"Data" : this.formatDate(resultItem.timestamp, "DD/MM/YYYY", this.timezoneData),
-					"Hora" : this.formatDate(resultItem.timestamp, "HH:mm:ss", this.timezoneData),					
-					"Remetente" : this.printId(resultItem.sender),
-					"Destinatário(s)" : this.isMultipleRecipients(resultItem.recipients) ? resultItem.recipients : this.printId(resultItem.recipients),
-					"ID do Grupo" : this.printValue(resultItem.groupId),
-					"Endereço IP (Remetente)" : this.printValue(resultItem.ip),
-					"Porta Lógica (Remetente)" : this.printValue(resultItem.port),					
-					"País" : this.printValue(this.ispList?.[resultItem.ispIndex].country), 
-					"UF" : this.printValue(this.ispList?.[resultItem.ispIndex].region), 
-					"Cidade" : this.printValue(this.ispList?.[resultItem.ispIndex].city), 
-					"ISP" : this.printValue(this.ispList?.[resultItem.ispIndex].isp),
-					"Dispositivo" : this.printValue(resultItem.senderDevice),
-					"Tipo" : this.printValue(resultItem.type),
-					"Estilo Mensagem" : this.printValue(resultItem.msgStyle),
-					"Tamanho Mensagem" : this.printValue(resultItem.msgSize)
+					[ this.$t('messagesList.msgId') ] : this.printValue(resultItem.msgId),
+					[ this.$t('messagesList.date') ] : this.formatDate(resultItem.timestamp, "DD/MM/YYYY", this.timezoneData),
+					[ this.$t('messagesList.time') ] : this.formatDate(resultItem.timestamp, "HH:mm:ss", this.timezoneData),					
+					[ this.$t('messagesList.sender') ] : this.printId(resultItem.sender),
+					[ this.$t('messagesList.recipients') ] : this.isMultipleRecipients(resultItem.recipients) ? resultItem.recipients : this.printId(resultItem.recipients),
+					[ this.$t('messagesList.groupId') ] : this.printValue(resultItem.groupId),
+					[ this.$t('messagesList.ipAddressSender') ] : this.printValue(resultItem.ip),
+					[ this.$t('messagesList.portSender') ] : this.printValue(resultItem.port),					
+					[ this.$t('messagesList.country') ] : this.printValue(this.ispList?.[resultItem.ispIndex].country), 
+					[ this.$t('messagesList.region') ] : this.printValue(this.ispList?.[resultItem.ispIndex].region), 
+					[ this.$t('messagesList.city') ] : this.printValue(this.ispList?.[resultItem.ispIndex].city), 
+					[ this.$t('messagesList.isp') ] : this.printValue(this.ispList?.[resultItem.ispIndex].isp),
+					[ this.$t('messagesList.device') ] : this.printValue(resultItem.senderDevice),
+					[ this.$t('messagesList.type') ] : this.printValue(resultItem.type),
+					[ this.$t('messagesList.msgStyle') ] : this.printValue(resultItem.msgStyle),
+					[ this.$t('messagesList.msgSize') ] : this.printValue(resultItem.msgSize)
 				};
 				exportDataList.push(exportData);
 			}			
 
 			var worksheet = XLSX.utils.json_to_sheet(exportDataList);					
 			var workbook = XLSX.utils.book_new();
-			XLSX.utils.book_append_sheet(workbook, worksheet, "Mensagens");
-			XLSX.writeFile(workbook, "whatsapp-extract-result.xlsx");
+			XLSX.utils.book_append_sheet(workbook, worksheet, this.$t('messagesList.msgs'));
+			XLSX.writeFile(workbook, `${this.processedData?.requestParams?.accountId}-whatsapp-messages.xlsx`);
 		},
 		previewsPage() {
 			if(this.currentPage > 1) {

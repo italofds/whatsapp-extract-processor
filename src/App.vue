@@ -139,13 +139,13 @@
 									<ul class="list-unstyled mb-0">
 										<li><strong>{{processedData.messageLogs.length}}</strong> {{ $t('app.msgRecords') }}</li>
 										<li><strong>{{processedData.callLogs.length}}</strong> {{ $t('app.callRecords') }}</li>
-										<li>{{ $t('app.fromTo', { start: formatDate(startDate, "DD/MM/YYYY", selectedTimezone), end: formatDate(finalDate, "DD/MM/YYYY", selectedTimezone) }) }}</li>
+										<li>{{ $t('app.fromTo', { start: formatDate(startDate, "L", selectedTimezone, this.$i18n.locale), end: formatDate(finalDate, "L", selectedTimezone, this.$i18n.locale) }) }}</li>
 									</ul>
 								</div>
 							</div>
 
 							<div v-if="processedIspCount != processedData.ispList?.length" class="alert mb-4 alert-warning" role="alert">
-								<div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">Loading...</span></div>
+								<div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">{{ $t('app.loading') }}</span></div>
 								<span>{{ $t('app.consultingIps', { count: processedIspCount, total: processedData.ispList?.length }) }}</span>
 							</div>
 
@@ -156,7 +156,7 @@
 							</div>
 
 							<div v-if="loadingWaAccount > 0" class="alert mb-4 alert-warning" role="alert">
-								<div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">Loading...</span></div>
+								<div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">{{ $t('app.loading') }}</span></div>
 								<span>{{ $t('app.consultingWaProfiles', { count: loadedWaAccount, total: processedData.contactList.length }) }}</span>
 							</div>
 
@@ -510,7 +510,7 @@ export default {
 							
 						} catch (error) {
 							item.status = "error"
-							console.error('Ocorreu um erro durante a busca dos dados de IPs: ', error);
+							console.error('An error occurred while fetching IP data: ', error);
 						}	
 					}					
 				}	
@@ -551,7 +551,7 @@ export default {
 							
 						} catch (error) {
 							item.status = "error"
-							console.error('Ocorreu um erro durante a fazer consulta na API do WhatsApp: ', error);
+							console.error('An error occurred while querying the WhatsApp API: ', error);
 						}
 					}						
 				}

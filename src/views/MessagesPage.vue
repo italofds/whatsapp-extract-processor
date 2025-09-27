@@ -1,9 +1,9 @@
 <template>
     <div class="p-4 pb-0">
-        <h1 class="mb-4">Registros de Mensagens</h1>
+        <h1 class="mb-4">{{ $t('messages.title') }}</h1>
 
         <div class="card mb-4 rounded-3 shadow-sm">
-            <h4 class="card-header py-3">Localização Aproximada dos Provedores</h4>
+            <h4 class="card-header py-3">{{ $t('messages.providersLocation') }}</h4>
             <div class="card-body">
                 <map-component ref="mapComponent" :targetMarkers="targetMarkers" :notTargetMarkers="notTargetMarkers"></map-component>
             </div>
@@ -11,8 +11,8 @@
 
         <div class="card rounded-3 shadow-sm">
             <h4 class="card-header py-3">
-                Lista de Mensagens
-                <button class="btn btn-outline-secondary ms-3" @click="$refs.listComponent.exportExcel()">Exportar Excel</button>
+                {{ $t('messages.listTitle') }}
+                <button class="btn btn-outline-secondary ms-3" @click="$refs.listComponent.exportExcel()">{{ $t('messages.exportExcel') }}</button>
             </h4>
             <div class="card-body">
                 <list-component ref="listComponent" :processedData="processedData" :timezoneData="selectedTimezone"></list-component>

@@ -5,13 +5,8 @@
                 <h1 class="mb-3">{{ $t('home.title') }}</h1>
                 <p class="lead" v-html="$t('home.intro1')"></p>
                 <p class="lead" v-html="$t('home.intro2')"></p>
-                <div class="alert alert-info mt-4" role="alert">
-                    <p class="lead" v-html="$t('home.alert1')"></p>
-                    <hr/>
-                    <p class="lead" v-html="$t('home.alert2')"></p>
-                </div>
-
-                <form @submit.prevent="handleFormSubmit" class="">
+                
+                <form @submit.prevent="handleFormSubmit" class="mt-5">
                     <div class="row">
                         <div class="input-group mb-2">
                             <input v-on:change="previewFiles" id="inputFiles" name="file" type="file" class="form-control form-control-lg" aria-label="Upload" accept=".html" required multiple>
@@ -20,12 +15,17 @@
                     </div>
                 </form>
 
-                <div v-if="processingProgress != null" class="alert mt-3 alert-warning" role="alert">
-                    <div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">Loading...</span></div>
+                <div class="alert alert-info mt-2" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <small v-html="$t('home.alert1')"></small>
+                </div>
+
+                <div v-if="processingProgress != null" class="alert mt-2 alert-warning" role="alert">
+                    <div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">{{ $t('app.loading') }}</span></div>
                     {{ $t('home.processingAlert', { progress: processingProgress }) }}
                 </div>
 
-                <p class="text-center text-muted small mt-5 pt-5 border-top separator">{{ $t('home.readJson') }}</p>
+                <p class="text-center text-muted small mt-5 pt-5 border-top separator" :data-content="$t('home.orDivider')" >{{ $t('home.readJson') }}</p>
                 <div class="w-100 text-center">
                     <label for="inputSavedFile" class="btn btn-primary btn-lg">{{ $t('home.selectJsonButton') }}</label>
                     <input v-on:change="openSavedFile" class="d-none" aria-label="Upload" id="inputSavedFile" type="file" accept=".json">
@@ -124,7 +124,7 @@ export default {
     }
 
     .separator:before {
-        content: 'OU';
+        content: attr(data-content);
         position: absolute;
         width: 100px;
         height: 20px;

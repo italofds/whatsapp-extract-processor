@@ -1,46 +1,46 @@
 <template>
     <div class="p-4 pb-0">
-        <h1 class="mb-4">Gráficos</h1>
+        <h1 class="mb-4">{{ $t('charts.title') }}</h1>
         
         <div class="d-flex flex-row">
             
             <div style="min-width: 300px;">
                 <div class="card rounded-3 shadow-sm me-4">
                     <div class="card-header">
-                        <h4 class="card-title">Filtros</h4>
+                        <h4 class="card-title">{{ $t('charts.filtersTitle') }}</h4>
                     </div>
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex flex-column mb-3">
-                            <label class="form-label">Tipo de Conversa</label>
+                            <label class="form-label">{{ $t('charts.conversationTypeLabel') }}</label>
                             <div class="list-group">
                                 <label class="list-group-item list-group-item-action">
                                     <input class="form-check-input" type="radio" v-model="conversationType" value="all">
-                                    <span class="ms-3">Todos</span>
+                                    <span class="ms-3">{{ $t('charts.conversationTypeAll') }}</span>
                                 </label>
                                 <label class="list-group-item list-group-item-action">
                                     <input class="form-check-input" type="radio" v-model="conversationType" value="messages">
-                                    <span class="ms-3">Mensagens</span>
+                                    <span class="ms-3">{{ $t('charts.conversationTypeMessages') }}</span>
                                 </label>
                                 <label class="list-group-item list-group-item-action">
                                     <input class="form-check-input" type="radio" v-model="conversationType" value="calls">
-                                    <span class="ms-3">Chamadas</span>
+                                    <span class="ms-3">{{ $t('charts.conversationTypeCalls') }}</span>
                                 </label>
                             </div>
                         </div>
                         <div class="d-flex flex-column">
-                            <label class="form-label">Direção da Comunicação</label>
+                            <label class="form-label">{{ $t('charts.communicationDirectionLabel') }}</label>
                             <div class="list-group">
                                 <label class="list-group-item list-group-item-action">
                                     <input class="form-check-input" type="radio" v-model="communicationDirection" value="all">
-                                    <span class="ms-3">Todas</span>
+                                    <span class="ms-3">{{ $t('charts.communicationDirectionAll') }}</span>
                                 </label>
                                 <label class="list-group-item list-group-item-action">
                                     <input class="form-check-input" type="radio" v-model="communicationDirection" value="sended">
-                                    <span class="ms-3">Enviadas</span>
+                                    <span class="ms-3">{{ $t('charts.communicationDirectionSended') }}</span>
                                 </label>
                                 <label class="list-group-item list-group-item-action">
                                     <input class="form-check-input" type="radio" v-model="communicationDirection" value="received">
-                                    <span class="ms-3">Recebidas</span>
+                                    <span class="ms-3">{{ $t('charts.communicationDirectionReceived') }}</span>
                                 </label>
                             </div>
                         </div>
@@ -50,62 +50,8 @@
             </div>            
             
             <div class="flex-fill">
-                <chart-component :data="dataChart1" :title="'Registros por Data'" :type="'line'"></chart-component>
-                <chart-component :data="dataChart2.data" :title="'Interlocutores mais Comuns'" :type="'bar'" :options="dataChart2.options"></chart-component>
-                
-                <!-- <div class="card rounded-3 shadow-sm mb-3">
-                    <div class="card-header">
-                        <h4 class="card-title">Registros por Dia da Semana</h4>
-                    </div>
-                    <div class="card-body">
-                        ...
-                    </div>
-                </div>
-                
-                <div class="card rounded-3 shadow-sm mb-3">
-                    <div class="card-header">
-                        <h4 class="card-title">Registros por Hora</h4>
-                    </div>
-                    <div class="card-body">
-                        ...
-                    </div>
-                </div>
-                
-                <div class="card rounded-3 shadow-sm mb-3">
-                    <div class="card-header">
-                        <h4 class="card-title">Registros por Provedor</h4>
-                    </div>
-                    <div class="card-body">
-                        ...
-                    </div>
-                </div>
-                
-                <div class="card rounded-3 shadow-sm mb-3">
-                    <div class="card-header">
-                        <h4 class="card-title">Registros por Local Aproximado</h4>
-                    </div>
-                    <div class="card-body">
-                        ...
-                    </div>
-                </div>
-                
-                <div class="card rounded-3 shadow-sm mb-3">
-                    <div class="card-header">
-                        <h4 class="card-title">Tipos de Mensagens</h4>
-                    </div>
-                    <div class="card-body">
-                        ...
-                    </div>
-                </div>
-                
-                <div class="card rounded-3 shadow-sm">
-                    <div class="card-header">
-                        <h4 class="card-title">Tipos de Chamadas</h4>
-                    </div>
-                    <div class="card-body">
-                        ...
-                    </div>
-                </div> -->
+                <chart-component :data="dataChart1" :title="$t('charts.recordsByDate')" :type="'line'"></chart-component>
+                <chart-component :data="dataChart2.data" :title="$t('charts.mostCommonInterlocutors')" :type="'bar'" :options="dataChart2.options"></chart-component>
             </div>
         </div>
     </div>
@@ -199,7 +145,7 @@ export default {
                 
                 const dateCountsArray = continuousDates.map(date => {
                     const count = recordDates.filter(d => d === date).length;
-                    const formatedDate = moment(date, "YYYY-MM-DD").format("DD/MM/YYYY");
+                    const formatedDate = moment(date, "YYYY-MM-DD").locale(this.$i18n.locale).format("L");
                     return { date:formatedDate, count };
                 });
                 
@@ -207,7 +153,7 @@ export default {
                     labels: dateCountsArray.map(row => row.date),
                     datasets: [
                     {
-                        label: 'Qtd. de Registros',
+                        label: this.$t('charts.recordsCount'),
                         data: dateCountsArray.map(row => row.count)
                     }
                     ]
@@ -268,14 +214,14 @@ export default {
                                 return false;
                             });
                             if (item && item.msgStyle === 'group') {
-                                return "Grupo " + row.contact;
+                                return this.$t('app.group') + " " + row.contact;
                             } else {
                                 return this.formatPhoneNumber(row.contact);
                             }
                         }),
                         datasets: [
                             {
-                                label: 'Qtd. de Registros',
+                                label: this.$t('charts.recordsCount'),
                                 data: result.map(row => row.count)
                             }
                         ]

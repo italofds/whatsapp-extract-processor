@@ -23,6 +23,6 @@ export function formatPhoneNumber(phoneNumber) {
     return `+${phoneNumber}`;
 }
 
-export function formatDate(dateValue, format, timezone = "0") {
-    return moment.utc(dateValue).utcOffset(timezone).locale('pt-br').format(format);
+export function formatDate(dateValue, format, timezone = "0", locale = 'pt-BR') {
+    return moment.utc(dateValue).utcOffset(timezone).locale(locale).format(format);
 }

@@ -1,40 +1,40 @@
 <template>
     <div class="flex-fill p-4 pb-0 d-flex flex-column" style="min-height: 0;">
-        <h1 class="mb-4 flex-shrink-0">Visualização</h1>
+        <h1 class="mb-4 flex-shrink-0">{{ $t('view.title') }}</h1>
 
         <div v-if="processedWaCount > 0 && processedWaCount < groupedMessages.length" class="alert mb-3 alert-warning" role="alert">
-            <div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">Loading...</span></div>
-            <span>Consultando informações públicas de perfis do WhatsApp: <strong>{{ processedWaCount }}</strong> de <strong>{{ groupedMessages.length }}</strong> </span>
+            <div class="spinner-border spinner-border-sm me-3"><span class="visually-hidden">{{ $t('app.loading') }}</span></div>
+            <span>{{ $t('view.consultingWaProfiles', { processed: processedWaCount, total: groupedMessages.length }) }}</span>
         </div>
         
         <div class="card rounded-3 shadow-sm d-flex flex-row flex-fill" style="min-height: 0;">
 
             <div class="border-end rounded-end-0 p-3 bg-body-tertiary rounded-3 d-flex flex-column">
-                <button style="border:none;" title="Conversas" :class="['btn btn-outline-secondary btn-lg mb-3', { 'active': activePanel == 'conversations' }]" @click="switchPanel('conversations')">
+                <button style="border:none;" :title="$t('view.conversationsTab')" :class="['btn btn-outline-secondary btn-lg mb-3', { 'active': activePanel == 'conversations' }]" @click="switchPanel('conversations')">
                     <i class="bi bi-chat-left-text-fill"></i>
                 </button>
-                <button style="border:none;" title="Ligações" :class="['btn btn-outline-secondary btn-lg', { 'active': activePanel == 'calls' }]" @click="switchPanel('calls')">
+                <button style="border:none;" :title="$t('view.callsTab')" :class="['btn btn-outline-secondary btn-lg', { 'active': activePanel == 'calls' }]" @click="switchPanel('calls')">
                     <i class="bi bi-telephone-fill"></i>
                 </button>
             </div>
 
             <div v-if="activePanel == 'conversations'" class="d-flex flex-column border-end" style="width: 400px; min-height: 0;">
-                <h4 class="p-3">Conversas</h4>
+                <h4 class="p-3">{{ $t('view.conversationsTab') }}</h4>
 
                 <div class="input-group px-3 mb-3">
                     <span class="input-group-text" id="basic-addon1"><svg class="bi"><use href="#search"></use></svg></span>
-                    <input v-model="chatFilter" type="text" class="form-control" placeholder="Pesquisar conversas" aria-label="Pesquisar conversas">
+                    <input v-model="chatFilter" type="text" class="form-control" :placeholder="$t('view.searchConversations')" :aria-label="$t('view.searchConversations')" >
                 </div>
 
                 <div class="px-3 mb-3">
                     <input type="radio" class="btn-check" name="radioFilter" id="btnradioall" value="" v-model="chatTypeFilter" >
-                    <label class="btn btn-sm btn-outline-secondary rounded-pill me-2" for="btnradioall">Tudo</label>
+                    <label class="btn btn-sm btn-outline-secondary rounded-pill me-2" for="btnradioall">{{ $t('view.all') }}</label>
 
                     <input type="radio" class="btn-check" name="radioFilter" id="btnradioindividual" value="individual" v-model="chatTypeFilter">
-                    <label class="btn btn-sm btn-outline-secondary rounded-pill me-2" for="btnradioindividual">Contatos</label>
+                    <label class="btn btn-sm btn-outline-secondary rounded-pill me-2" for="btnradioindividual">{{ $t('view.contacts') }}</label>
 
                     <input type="radio" class="btn-check" name="radioFilter" id="btnradiogroup" value="group" v-model="chatTypeFilter">
-                    <label class="btn btn-sm btn-outline-secondary rounded-pill" for="btnradiogroup">Grupos</label>
+                    <label class="btn btn-sm btn-outline-secondary rounded-pill" for="btnradiogroup">{{ $t('view.groups') }}</label>
                 </div>
 
                 <div class="flex-grow-1 overflow-auto" style="min-height: 0;">
@@ -57,8 +57,8 @@
                                 </div>
                             </div>
                             <div class="d-flex flex-column text-muted text-center align-self-center">
-                                <small>{{ formatDate(getLastMessage(conversation).timestamp, "DD/MM/YYYY", selectedTimezone) }}</small>
-                                <small>{{ formatDate(getLastMessage(conversation).timestamp, "HH:mm:ss", selectedTimezone) }}</small>
+                                <small>{{ formatDate(getLastMessage(conversation).timestamp, "L", selectedTimezone, this.$i18n.locale) }}</small>
+                                <small>{{ formatDate(getLastMessage(conversation).timestamp, "LTS", selectedTimezone, this.$i18n.locale) }}</small>
                             </div>                           
                         </div>
                     </div>                    
@@ -66,11 +66,11 @@
             </div>
 
             <div v-if="activePanel == 'calls'" class="d-flex flex-column border-end" style="width: 400px; min-height: 0;">
-                <h4 class="p-3">Ligações</h4>
+                <h4 class="p-3">{{ $t('view.callsTab') }}</h4>
 
                 <div class="input-group px-3 mb-3">
                     <span class="input-group-text" id="basic-addon1"><svg class="bi"><use href="#search"></use></svg></span>
-                    <input v-model="callFilter" type="text" class="form-control" placeholder="Pesquisar chamadas" aria-label="Pesquisar chamadas">
+                    <input v-model="callFilter" type="text" class="form-control" :placeholder="$t('view.searchCalls')" :aria-label="$t('view.searchCalls')" >
                 </div>
 
                 <div class="flex-grow-1 overflow-auto" style="min-height: 0;">
@@ -92,7 +92,7 @@
                                 <div class="text-muted d-flex flex-row">
                                     <i v-if="groupedCall.calls[0].direction == 'outgoing'" class="bi bi-arrow-up-right me-1 text-success"></i>
                                     <i v-if="groupedCall.calls[0].direction == 'incoming'" :class="['bi bi-arrow-down-left me-1 text-success', {'text-danger': !groupedCall.calls[0].answered}]"></i>
-                                    <small>{{ formatDate(groupedCall.calls[0].timestamp, "DD [de] MMMM [de] YYYY, HH:mm:ss", selectedTimezone) }}</small>
+                                    <small>{{ formatDate(groupedCall.calls[0].timestamp, "LL, LTS", selectedTimezone, this.$i18n.locale) }}</small>
                                 </div>                                
                             </div>   
                             <div class="text-muted text-center align-self-center">
@@ -147,14 +147,14 @@
                                     <small class="text-muted" style="font-size: 75%;">{{ ispList?.[message.ispIndex].isp }}</small>
                                 </div>                            
                                 <div class="text-end w-100">
-                                    <small class="text-muted fw-bold" style="font-size: 75%;">{{ formatDate(message.timestamp, "HH:mm:ss", selectedTimezone) }}</small>
+                                    <small class="text-muted fw-bold" style="font-size: 75%;">{{ formatDate(message.timestamp, "LTS", selectedTimezone, this.$i18n.locale) }}</small>
                                 </div>
                             </div>                        
                         </div>
                     </section>  
                     
                     <div class="d-flex justify-content-center align-items-center">
-                        <div class="badge rounded-pill bg-body text-body">Fim</div>
+                        <div class="badge rounded-pill bg-body text-body">{{ $t('view.endMarker') }}</div>
                     </div>
                 </div>
             </div>
@@ -184,21 +184,21 @@
                                     <i v-if="call.direction == 'incoming'" :class="['bi bi-arrow-down-left me-2 text-success h4 align-self-center', {'text-danger': !call.answered}]"></i>
                                     
                                     <div class="flex-fill align-self-center d-flex flex-column">
-                                        <span v-if="call.direction == 'outgoing'">Efetuada</span>
-                                        <span v-if="call.direction == 'incoming' && call.answered">Recebida</span>
-                                        <span v-if="call.direction == 'incoming' && !call.answered">Perdida</span>
+                                        <span v-if="call.direction == 'outgoing'">{{ $t('view.callMade') }}</span>
+                                        <span v-if="call.direction == 'incoming' && call.answered">{{ $t('view.callReceived') }}</span>
+                                        <span v-if="call.direction == 'incoming' && !call.answered">{{ $t('view.callMissed') }}</span>
                                         <div class="text-muted d-flex flex-row">
                                             <i v-if="call.callEvents[0].mediaType == 'audio'" class="bi bi-telephone me-1"></i>
                                             <i v-if="call.callEvents[0].mediaType == 'video'" class="bi bi-camera-video me-1"></i>                            
-                                            <small>{{ formatDate(call.timestamp, "HH:mm:ss", selectedTimezone) }}</small>
+                                            <small>{{ formatDate(call.timestamp, "LTS", selectedTimezone, this.$i18n.locale) }}</small>
                                         </div>
                                     </div>
 
                                     <div class="d-flex flex-column text-muted text-end align-self-center">
-                                        <small v-if="call.talkTime > 0" title="Tempo de Conversação">{{ convertSeconds(call.talkTime) }}</small>
-                                        <small v-if="call.talkTime == 0 && getTerminatonType(call.callEvents) == 'rejected'" >Ligação Recusada</small>
-                                        <small v-if="call.talkTime == 0 && getTerminatonType(call.callEvents) == 'not-answered'" >Não Atendida</small>
-                                        <small title="Tempo Total da Chamada">{{ convertSeconds(call.totalTime) }}</small>
+                                        <small v-if="call.talkTime > 0" :title="$t('view.talkTime')">{{ convertSeconds(call.talkTime) }}</small>
+                                        <small v-if="call.talkTime == 0 && getTerminatonType(call.callEvents) == 'rejected'" >{{ $t('view.callRejected') }}</small>
+                                        <small v-if="call.talkTime == 0 && getTerminatonType(call.callEvents) == 'not-answered'" >{{ $t('view.callNotAnswered') }}</small>
+                                        <small :title="$t('view.totalCallTime')">{{ convertSeconds(call.totalTime) }}</small>
                                     </div>
                                 </div>
 
@@ -206,12 +206,12 @@
                                     <div class="mx-3 border-top">
                                         <ul class="timeline">
                                             <li v-for="(event, index2) in call.callEvents" :key="index2">
-                                                <span target="_blank" href="#"><strong>Evento:</strong> {{ event.type }}</span>
-                                                <small class='float-end' title="Hora do Evento">{{ formatDate(event.timestamp, "HH:mm:ss", selectedTimezone) }}</small>
+                                                <span target="_blank" href="#"><strong>{{ $t('view.event') }}:</strong> {{ event.type }}</span>
+                                                <small class='float-end' :title="$t('view.eventTime')">{{ formatDate(event.timestamp, "LTS", selectedTimezone, this.$i18n.locale) }}</small>
                                                 <small class="mb-3 text-muted">
-                                                    <div title="Origem">{{ formatPhoneNumber(event.from) }}</div>
-                                                    <div v-if="event.ip" title="Endereço IP e Porta Lógica">{{ event.ip + "/" + event.port  }}</div>
-                                                    <div v-if="ispList && event.ispIndex" title="Provedor">{{ printValue(ispList?.[event.ispIndex].isp)  }}</div>
+                                                    <div :title="$t('view.origin')">{{ formatPhoneNumber(event.from) }}</div>
+                                                    <div v-if="event.ip" :title="$t('view.ipPort')">{{ event.ip + "/" + event.port  }}</div>
+                                                    <div v-if="ispList && event.ispIndex" :title="$t('view.provider')">{{ printValue(ispList?.[event.ispIndex].isp)  }}</div>
                                                 </small>                                                
                                             </li>
                                         </ul>
@@ -224,7 +224,7 @@
             </div>
 
             <div v-if="!activeTarget" class="bg-body-tertiary flex-fill d-flex justify-content-center align-items-center rounded-3 rounded-start-0">
-                <small class="text-muted">Navegue nas conversas/ligações para visualizar as mensagens/registros.</small>
+                <small class="text-muted">{{ $t('view.navigateToSee') }}</small>
             </div>
         </div>
     </div>
@@ -266,7 +266,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Perfil <span v-if="getContact(activeContact)?.isBusiness">Comercial</span></h1>
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t('view.profile') }} <span v-if="getContact(activeContact)?.isBusiness">{{ $t('view.business') }}</span></h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body bg-body-tertiary">
@@ -278,30 +278,30 @@
                             <img v-if="getProfilePic(activeContact)" class="w-100 mb-2" :src="getProfilePic(activeContact)" />
                             <h4 class="text-center">
                                 <div>{{ formatPhoneNumber(activeContact) }}</div>
-                                <small v-if="!isNameEditable" class="text-muted">{{ newName ? newName : '~Sem Nome' }}</small>
+                                <small v-if="!isNameEditable" class="text-muted">{{ newName ? newName : $t('view.noName') }}</small>
                             </h4>
-                            <input v-if="isNameEditable" class="form-control text-center" v-model="newName" placeholder="Nome do Contato" />
+                            <input v-if="isNameEditable" class="form-control text-center" v-model="newName" :placeholder="$t('view.contactName')" />
                         </div>
                     </div>
 
                     <div v-if="getContact(activeContact)?.about" class="card shadow-sm mb-3">
                         <div class="card-body">
-                            <label class="form-label">Sobre</label>
+                            <label class="form-label">{{ $t('view.about') }}</label>
                             <div>{{ getContact(activeContact)?.about }}</div>
                         </div>
                     </div>
                     
                     <div v-if="getContact(activeContact)?.description" class="card shadow-sm mb-3">
                         <div class="card-body">
-                            <label class="form-label">Descrição</label>
+                            <label class="form-label">{{ $t('view.description') }}</label>
                             <div>{{ getContact(activeContact)?.description }}</div>
                         </div>
                     </div> 
                 </div>
                 <div class="modal-footer">
-                    <button v-if="isNameEditable" class="btn btn-outline-secondary" @click="setNameEditable(false)">Cancelar</button>
-                    <button v-if="isNameEditable" class="btn btn-primary" @click="saveContact()" >Salvar</button>
-                    <button v-if="!isNameEditable" class="btn btn-primary" @click="setNameEditable(true)">Alterar</button>
+                    <button v-if="isNameEditable" class="btn btn-outline-secondary" @click="setNameEditable(false)">{{ $t('view.cancel') }}</button>
+                    <button v-if="isNameEditable" class="btn btn-primary" @click="saveContact()" >{{ $t('view.save') }}</button>
+                    <button v-if="!isNameEditable" class="btn btn-primary" @click="setNameEditable(true)">{{ $t('view.edit') }}</button>
                 </div>
             </div>
         </div>
@@ -452,9 +452,7 @@ export default {
                         }
                     }
                 }
-
-                console.log("GROUPED CALLS");
-                console.log(groupedCalls);
+                
                 return groupedCalls;
             }
             return null;
@@ -472,7 +470,7 @@ export default {
         printId(conversation) {
             if(conversation) {
                 if(conversation.msgStyle == 'group') {
-                    return 'Grupo ' + conversation.id;
+                    return this.$t('app.group') + " " + conversation.id;
                 } else {
                     var contactName = this.getContact(conversation.id)?.name;
                     if(contactName) {
@@ -494,28 +492,28 @@ export default {
         },
         getMessageType(message) {
             if(message.type == 'text') {
-                return "Texto";
-                
+                return this.$t('view.textMessage');
+
             } else if(message.type == 'voice') {
-                return "Áudio";
+                return this.$t('view.voiceMessage');
 
             } else if(message.type == 'video') {
-                return "Vídeo";
+                return this.$t('view.videoMessage');
 
             } else if(message.type == 'sticker') {
-                return "Figurinha";
+                return this.$t('view.stickerMessage');
 
             } else if(message.type == 'image') {
-                return "Foto";
+                return this.$t('view.imageMessage');
 
             } else if(message.type == 'document') {
-                return "Documento";
+                return this.$t('view.documentMessage');
 
             } else if(message.type == 'reaction') {
-                return "Reação";
-            
+                return this.$t('view.reactionMessage');
+
             } else {
-                return "Outros";
+                return this.$t('view.unknownMessage');
             }
         },
         isSended(message) {
@@ -541,7 +539,7 @@ export default {
                 const groupedItens = {};
 
                 itemList.forEach(item => {
-                    let date = formatDate(item.timestamp, "DD/MM/YYYY", this.selectedTimezone);
+                    let date = formatDate(item.timestamp, "L", this.selectedTimezone, this.$i18n.locale);
                     if (!groupedItens[date]) {
                         groupedItens[date] = [];
                     }

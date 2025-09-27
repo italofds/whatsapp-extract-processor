@@ -5,8 +5,8 @@
     </GMapMap>
 
     <div class="mt-3 d-flex flex-row justify-content-center gap-5">
-        <div class="target-markers small text-muted">Posições aproximadas do alvo</div>
-        <div class="not-target-markers small text-muted">Posições aproximadas dos interlocutores</div>
+        <div class="target-markers small text-muted">{{ $t('map.approximateTargetPositions') }}</div>
+        <div class="not-target-markers small text-muted">{{ $t('map.approximateInterlocutorPositions') }}</div>
     </div>
 </template>
 
