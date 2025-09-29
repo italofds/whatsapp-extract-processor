@@ -1,6 +1,12 @@
 <template>
     <div class="p-4 pb-0">
         <h1 class="mb-4">{{ $t('charts.title') }}</h1>
+
+        <div class="alert mb-4 alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span>{{ $t('charts.ipLookupInProgress') }}</span>
+            <a href="#" class="alert-link" @click="refreshCharts">{{ $t('charts.refresh') }}</a>
+        </div>
         
         <div class="d-flex flex-row">
             
@@ -50,16 +56,26 @@
             </div>            
             
             <div class="flex-fill">
-                <chart-component :data="dataChart1" :title="$t('charts.recordsByDate')" :type="'line'"></chart-component>
-                <chart-component :data="dataChart2.data" :title="$t('charts.mostCommonInterlocutors')" :type="'bar'" :options="dataChart2.options"></chart-component>
+                <chart-component :data="dateChart" :title="$t('charts.recordsByDate')" :type="'line'"/>
+                <chart-component :data="hourChart" :title="$t('charts.recordsByHour')" :type="'line'"/>
+                <chart-component :data="interlocutorChart?.data" :title="$t('charts.mostCommonInterlocutors')" :type="'bar'" :options="interlocutorChart?.options"></chart-component>
+                <chart-component :data="ispChart?.data" :title="$t('charts.mostCommonIsps')" :type="'pie'" :options="ispChart?.options"></chart-component>
+                <div class="card rounded-3 shadow-sm mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title">{{ $t('charts.connectionLocation') }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <map-component ref="mapComponent" :heatmapData="heatmapData"></map-component>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-
 import ChartComponent from '@/components/ChartComponent.vue';
+import MapComponent from '@/components/MapComponent.vue';
 import {formatDate, formatPhoneNumber} from '@/utils/utils'
 import moment from 'moment';
 
@@ -67,6 +83,7 @@ export default {
     name: 'ChartsPage',
     components: {
         ChartComponent,
+        MapComponent
     },
     props: {
         processedData: {
@@ -81,13 +98,24 @@ export default {
     data() {
         return {
             conversationType: "all",
-            communicationDirection: "all"
+            communicationDirection: "all",
+            heatmapData: null,
+            dateChart: null,
+            interlocutorChart: null,
+            ispChart: null,
+            hourChart: null
         }
     },
     mounted() {
         if(!this.processedData) {
             this.$router.push('/');
-        }
+        } else {
+            this.loadHeatmap();
+            this.loadDateChart();
+            this.loadInterlocutorChart();
+            this.loadIspChart();
+            this.loadHourChart();
+        }        
     },
     computed: {
         filteredList: function() {
@@ -124,8 +152,47 @@ export default {
             }
             
             return null;
+        }
+    },
+    methods: {
+        loadHourChart() {
+            if(this.filteredList && this.filteredList.length) {
+                // Extract local hour from each record
+                const hours = this.filteredList.map(log => {
+                    const date = this.formatDate(log.timestamp, "YYYY-MM-DD HH:mm:ss", this.selectedTimezone);
+                    // Get hour (00-23)
+                    return moment(date, "YYYY-MM-DD HH:mm:ss").hour();
+                });
+                // Count occurrences by hour
+                const hourCounts = Array(24).fill(0);
+                hours.forEach(h => { if (typeof h === 'number') hourCounts[h]++; });
+                this.hourChart = {
+                    labels: hourCounts.map((_, i) => i.toString().padStart(2, '0') + 'h'),
+                    datasets: [
+                        {
+                            label: this.$t('charts.recordsCount'),
+                            data: hourCounts
+                        }
+                    ]
+                };
+            } else {
+                this.hourChart = null;
+            }
         },
-        dataChart1: function() {
+        formatDate,
+        formatPhoneNumber,
+        loadHeatmap() {            
+            this.heatmapData = this.filteredList.map(item => {
+                if (typeof item.ispIndex === 'number' && this.processedData.ispList[item.ispIndex]) {
+                    const isp = this.processedData.ispList[item.ispIndex];
+                    if (typeof isp.lat === 'number' && typeof isp.lng === 'number') {
+                        return { location: new window.google.maps.LatLng(isp.lat, isp.lng), weight: 1 };
+                    }
+                }
+                return null;
+            }).filter(p => p);
+        },
+        loadDateChart() {
             if(this.filteredList && this.filteredList.length) {    
                 
                 const recordDates = this.filteredList.map(log =>
@@ -149,7 +216,7 @@ export default {
                     return { date:formatedDate, count };
                 });
                 
-                return {
+                this.dateChart = {
                     labels: dateCountsArray.map(row => row.date),
                     datasets: [
                     {
@@ -162,7 +229,7 @@ export default {
                 return null;
             }
         },
-        dataChart2: function() {
+        loadInterlocutorChart() {
             const contactList = {};
             const accountId = this.processedData.requestParams.accountId;
             
@@ -201,7 +268,7 @@ export default {
                 .sort((a, b) => b.count - a.count)
                 .slice(0, 10);
 
-                return {
+                this.interlocutorChart = {
                     data: {
                         labels: result.map(row => {
                             // If it's a group, return the id directly
@@ -238,13 +305,61 @@ export default {
             }   
             
             return null;
+        },
+        loadIspChart() {
+            if (!this.filteredList || !this.processedData || !this.processedData.ispList) return { data: null, options: null };
+            const ispCounts = {};
+            this.filteredList.forEach(item => {
+                if (typeof item.ispIndex === 'number' && this.processedData.ispList[item.ispIndex]) {
+                    const ispName = this.processedData.ispList[item.ispIndex].isp;
+                    if (ispName) {
+                        ispCounts[ispName] = (ispCounts[ispName] || 0) + 1;
+                    }
+                }
+            });
+            const result = Object.keys(ispCounts).map(isp => ({
+                isp,
+                count: ispCounts[isp]
+            })).sort((a, b) => b.count - a.count).slice(0, 10);
+            
+            this.ispChart = {
+                data: {
+                    labels: result.map(row => row.isp),
+                    datasets: [
+                        {
+                            label: this.$t('charts.recordsCount'),
+                            data: result.map(row => row.count)
+                        }
+                    ]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            };
+        },
+        refreshCharts() {
+            this.loadHeatmap();
+            this.loadDateChart();
+            this.loadInterlocutorChart();
+            this.loadIspChart();
+            this.loadHourChart();
         }
     },
-    methods: {
-        formatDate,
-        formatPhoneNumber
-    },
     watch: {
+        filteredList: {
+            handler() {
+                this.refreshCharts();
+            },
+            deep: true
+        },
+        selectedTimezone: {
+            handler() {
+                this.refreshCharts();
+            },
+            deep: true
+        }
     }
 };
 </script>

@@ -71,12 +71,16 @@
     "communicationDirectionSended": "Enviadas",
     "communicationDirectionReceived": "Recebidas",
     "recordsByDate": "Registros por Data",
+    "recordsByHour": "Registros por Hora",
     "mostCommonInterlocutors": "Interlocutores mais Comuns",
-    "recordsCount": "Qtd. de Registros"
+    "mostCommonIsps": "Provedores de Conexão mais Comuns",
+    "connectionLocation": "Localização Aproximada da Conexão",
+    "recordsCount": "Qtd. de Registros",
+    "ipLookupInProgress": "Alguns gráficos podem sofrer alterações enquanto a consulta de IPs estiver em andamento. ",
+    "refresh": "Clique aqui para atualizar"
   },
   "view": {
     "title": "Visualização",
-    "loading": "Carregando...",
     "consultingWaProfiles": "Consultando informações públicas de perfis do WhatsApp: {processed} de {total}",
     "conversationsTab": "Conversas",
     "callsTab": "Ligações",

@@ -1,12 +1,13 @@
 <template>
     <GMapMap ref="myMapRef" :center="mapCenter" :zoom="mapZoom" map-type-id="terrain" style="width: 100%; height: 400px" :options="mapOptions">                    
         <GMapMarker :key="marker" v-for="marker in notTargetMarkers" :zIndex="1" :position="marker.position" :icon="require('@/assets/images/yellow-pin.png')"/>
-        <GMapMarker :key="marker" v-for="marker in targetMarkers" :zIndex="2" :position="marker.position" :icon="require('@/assets/images/blue-pin.png')"/>		
+        <GMapMarker :key="marker" v-for="marker in targetMarkers" :zIndex="2" :position="marker.position" :icon="require('@/assets/images/blue-pin.png')"/>	
+        <GMapHeatmap :data="heatmapData" :options="{radius: 40}"></GMapHeatmap>	
     </GMapMap>
 
-    <div class="mt-3 d-flex flex-row justify-content-center gap-5">
-        <div class="target-markers small text-muted">{{ $t('map.approximateTargetPositions') }}</div>
-        <div class="not-target-markers small text-muted">{{ $t('map.approximateInterlocutorPositions') }}</div>
+    <div v-if="targetMarkers?.length > 0 || notTargetMarkers?.length > 0" class="mt-3 d-flex flex-row justify-content-center gap-5">
+        <div v-if="targetMarkers?.length > 0" class="target-markers small text-muted">{{ $t('map.approximateTargetPositions') }}</div>
+        <div v-if="notTargetMarkers?.length > 0" class="not-target-markers small text-muted">{{ $t('map.approximateInterlocutorPositions') }}</div>
     </div>
 </template>
 
@@ -17,7 +18,8 @@ export default {
     name: 'MapComponent',
     props: {
         targetMarkers: null,
-        notTargetMarkers: null
+        notTargetMarkers: null,
+        heatmapData: null
     },
     data() {
         return {
@@ -71,22 +73,24 @@ export default {
         notTargetMarkers() {
             this.refreshMapBounds();
         },
+        heatmapData() {
+            this.refreshMapBounds();
+        },
     },
     methods: {
         refreshMapBounds() {
-            const mergedMarkers = [
-                ...(this.targetMarkers ?? []),
-                ...(this.notTargetMarkers ?? [])
-            ];
-            
-            if(window.google && mergedMarkers && mergedMarkers.length > 0) {
-                const bounds = new window.google.maps.LatLngBounds();
-                mergedMarkers.map(marker => {
-                    bounds.extend({
-                        lat: marker.position.lat,
-                        lng: marker.position.lng,
-                    });
-                });
+            if(window.google) {          
+                let bounds = new window.google.maps.LatLngBounds();
+
+                if (this.heatmapData?.length > 0) {
+                    this.heatmapData?.forEach(p => bounds.extend(p.location));
+                }
+                if (this.targetMarkers?.length > 0) {
+                    this.targetMarkers?.forEach(m => bounds.extend(m.position));
+                }
+                if (this.notTargetMarkers?.length > 0) {
+                    this.notTargetMarkers?.forEach(m => bounds.extend(m.position));
+                }
                 this.$refs.myMapRef.fitBounds(bounds);
             }
         }

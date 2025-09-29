@@ -71,12 +71,16 @@
     "communicationDirectionSended": "Sent",
     "communicationDirectionReceived": "Received",
     "recordsByDate": "Records by Date",
+    "recordsByHour": "Records by Hour",
     "mostCommonInterlocutors": "Most Common Interlocutors",
-    "recordsCount": "Records Count"
+    "mostCommonIsps": "Most Common Connection Providers",
+    "connectionLocation": "Approximate Connection Location",
+    "recordsCount": "Records Count",
+    "ipLookupInProgress": "Some charts may change while IP lookup is in progress. ",
+    "refresh": "Click here to refresh"
   },
   "view": {
     "title": "Visualization",
-    "loading": "Loading...",
     "consultingWaProfiles": "Consulting public WhatsApp profile information: {processed} of {total}",
     "conversationsTab": "Conversations",
     "callsTab": "Calls",

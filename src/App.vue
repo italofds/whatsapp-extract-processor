@@ -13,7 +13,7 @@
 						<a class="text-light align-middle d-sm-inline d-none" href="https://github.com/italofds" target="_blank">italofds</a>
 						<span class="text-secondary align-middle d-sm-inline d-none"> / </span>
 						<a class="text-light align-middle" href="https://github.com/italofds/whatsapp-extract-processor" target="_blank">whatsapp-extract-processor</a>
-						<span class="badge rounded-pill text-bg-secondary align-middle ms-3" style="font-size:10pt;"><small>BETA</small></span>
+						<span class="badge rounded-pill text-bg-secondary align-middle ms-3" style="font-size:10pt;"><small>v.1.0.0</small></span>
 					</div>
 				</div>
 				
@@ -615,9 +615,9 @@ export default {
 		transition: min-width 0.5s ease;
 	}
 
-	@media (min-width: 450px) {
+	@media (min-width: 475px) {
 		.menu {
-			min-width: 450px;
+			min-width: 475px;
 		}
 	}
 

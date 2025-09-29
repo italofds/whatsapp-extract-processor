@@ -12,6 +12,7 @@ app.use(router);
 app.use(VueGoogleMaps, {
   load: {
     key: process.env.VUE_APP_MAPS_API_KEY,
+    libraries: ['geometry','visualization']
   },
 });
 app.use(i18n)
